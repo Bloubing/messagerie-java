@@ -75,7 +75,11 @@ public class GroupMsg implements PacketProcessor {
 	 * This method has to be called when removing a group in order to clean bidirectional membership.
 	 */
 	public void beforeDelete() {
-		members.forEach(m->m.getGroups().remove(this));
+		members.forEach(m -> m.getGroups().remove(this));
+	}
+	
+	public UserMsg getOwner() {
+		return this.owner;
 	}
 
 }

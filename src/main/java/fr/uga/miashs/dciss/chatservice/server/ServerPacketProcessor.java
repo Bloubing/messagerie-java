@@ -31,12 +31,25 @@ public class ServerPacketProcessor implements PacketProcessor {
 		byte type = buf.get();
 		
 		if (type == 1) { // cas creation de groupe
-			createGroup(p.srcId,buf);
-		} else {
+			createGroup(p.srcId, buf);
+		} else if (type == 2) {
+			removeGroup(p.srcId, buf);
+		}
+		
+		
+		else {
 			LOG.warning("Server message of type=" + type + " not handled by procesor");
 		}
 	}
 	
+	public void removeGroup(int ownerId, ByteBuffer data) {
+		int idGroupe = data.getInt();
+	
+		int nbMembres = data.getInt();
+		server.removeGroup(idGroupe);
+
+	}
+
 	public void createGroup(int ownerId, ByteBuffer data) {
 		int nb = data.getInt();
 		GroupMsg g = server.createGroup(ownerId);
