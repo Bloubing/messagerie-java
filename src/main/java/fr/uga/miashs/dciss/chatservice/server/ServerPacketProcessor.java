@@ -81,7 +81,7 @@ public class ServerPacketProcessor implements PacketProcessor {
 		int idGroupe = data.getInt();
 	
 		int nbMembres = data.getInt();
-		server.removeGroup(idGroupe);
+		server.removeGroup(idGroupe, idGroupe);
 	}
 
 	//type4
@@ -127,7 +127,7 @@ public class ServerPacketProcessor implements PacketProcessor {
 			group.removeMember(memberToRemove);
 		}
 	} 
-
+}
 
 	// //type6
 	//  public void setName(int usrId, ByteBuffer data){
