@@ -15,6 +15,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import fr.uga.miashs.dciss.chatservice.common.Packet;
@@ -132,6 +133,26 @@ public class ClientMsg {
 		}
 	}
 
+	//si il y a un fichier attaché  un message
+	public void sendFile(int destId, File file) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+
+		dos.writeByte(10); // Type d’action : transfert de fichier
+
+		byte[] nameBytes = file.getName().getBytes("UTF-8");
+		dos.writeInt(nameBytes.length); // longueur du nom
+		dos.write(nameBytes); // nom du fichier
+
+		byte[] fileBytes = Files.readAllBytes(file.toPath());
+		dos.writeInt(fileBytes.length); // longueur du contenu
+		dos.write(fileBytes); // données du fichier
+
+		dos.flush();
+		sendPacket(destId, bos.toByteArray());
+	}
+
+
 	/**
 	 * Send a packet to the specified destination (etiher a userId or groupId)
 	 * 
@@ -190,6 +211,9 @@ public class ClientMsg {
 		// add a dummy listener that print the content of message as a string
 		c.addMessageListener(p -> System.out.println(p.srcId + " says to " + p.destId + ": " + new String(p.data)));
 		
+		// listener pour la version fichier
+		c.addMessageListener(new MessageListenerImpl());
+
 		// add a connection listener that exit application when connection closed
 		c.addConnectionListener(active ->  {if (!active) System.exit(0);});
 
@@ -232,6 +256,7 @@ public class ClientMsg {
 				lu = sc.nextLine();
 				c.sendPacket(dest, lu.getBytes());
 				}
+
 				else if( type == 1) {
 					ArrayList<Integer> membres= new ArrayList<Integer>();
 					System.out.println("Ajouter id membre : (-1) pour stopper");
@@ -252,6 +277,19 @@ public class ClientMsg {
 					}
 					c.sendPacket(0, data.array());
 					
+				}
+				else if (type == 10) {
+					System.out.println("À quel utilisateur voulez-vous envoyer un fichier ?");
+					int dest = Integer.parseInt(sc.nextLine());
+					System.out.println("Chemin vers le fichier : ");
+					String path = sc.nextLine();
+					
+					File f = new File(path);
+					if (f.exists()) {
+					c.sendFile(dest, f);
+					} else {
+					System.out.println("Fichier introuvable.");
+					}
 				}
 			} catch (InputMismatchException | NumberFormatException e) {
 				System.out.println("Mauvais format");
