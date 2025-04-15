@@ -69,10 +69,10 @@ public class UserMsg implements PacketProcessor{
 		return groups;
 	}
 
-	public GroupMsg getGroup(int groupId) {
+	public GroupMsg getGroup(String groupName) {
 		GroupMsg group = null;
 		for (GroupMsg g : this.getGroups()) {
-			if (g.getId() == groupId) {
+			if (g.getName().equals(groupName)) {
 				group = g;
 				break;
 			}

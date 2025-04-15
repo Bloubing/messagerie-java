@@ -12,8 +12,6 @@
 package fr.uga.miashs.dciss.chatservice.server;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.logging.Logger;
 
 import fr.uga.miashs.dciss.chatservice.common.Packet;
@@ -51,57 +49,92 @@ public class ServerPacketProcessor implements PacketProcessor {
 		}
 	}
 	
+	public String readGroupNameFromData(ByteBuffer data) {
+		// Lire le nom du groupe
+		StringBuffer groupNameBuffer = new StringBuffer();
 
+		while (data.hasRemaining()) {
+			groupNameBuffer.append(data.getChar());
+		}
+		String groupName = groupNameBuffer.toString();
 
-	// type1
+		return groupName;
+	}
+	
+	public String readGroupNameFromData(ByteBuffer data, int length) {
+		// Lire le nom du groupe
+		StringBuffer groupNameBuffer = new StringBuffer();
+
+		for (int i = 0; i < length; i++) {
+			groupNameBuffer.append(data.getChar());
+		}
+		String groupName = groupNameBuffer.toString();
+		
+		return groupName;
+	}
+
+	// type 1 : créer un groupe
 	public void createGroup(int ownerId, ByteBuffer data) {
 		int nbMembres = data.getInt();
-		
+
+		// Lire tous les ids des membres
 		GroupMsg g = server.createGroup(ownerId);
 		for (int i = 0; i < nbMembres; i++) {
 			g.addMember(server.getUser(data.getInt()));
 		}
 
-		// Lire le nom du groupe
-		StringBuffer groupNameBuffer = new StringBuffer();
+		String groupNameRead = this.readGroupNameFromData(data);
+		g.setName(groupNameRead);
 		
-		while (data.hasRemaining()) {
-			groupNameBuffer.append(data.getChar());
-		}
-		String groupName = groupNameBuffer.toString();
-		g.setName(groupName);
 	}
-
+	
 	//type 2 : quitter un groupe
-	public void removeUser(int usrId, ByteBuffer data) {
-		UserMsg usr = server.getUser(usrId);
-		int groupId = data.getInt();
-		// On récupère le group, null sinon
-		GroupMsg group = usr.getGroup(groupId);
-		if (group != null && group.getMembers().contains(usr)) {
-        group.removeMember(usr);
+	public void removeUser(int userId, ByteBuffer data) {
+		UserMsg user = server.getUser(userId);
+		String groupNameRead = this.readGroupNameFromData(data);
+		// On cherche le groupe à quitter parmi 
+		// les groupes auxquels appartient l'user
+		// Si non trouvé : groupe == null
+		GroupMsg group = user.getGroup(groupNameRead);
+
+		// Si le groupe existe
+		if (group != null) {
+        group.removeMember(user);
     	}
 	}
 
-	// type3
+	// type 3 : supprimer un groupe
 	public void removeGroup(int ownerId, ByteBuffer data) {
-		int idGroupe = data.getInt();
-		server.removeGroup(idGroupe, ownerId);
+		String groupNameRead = this.readGroupNameFromData(data);
+		UserMsg ownerUser = server.getUser(ownerId);
+		int groupId = ownerUser.getGroup(groupNameRead).getId();
+
+		// On cherche le groupe à supprimer parmi 
+		// les groupes auxquels appartient l'user
+		// Si non trouvé : groupe == null
+		GroupMsg group = ownerUser.getGroup(groupNameRead);
+
+		// Si le groupe existe
+		// et que l'utilisateur est owner
+		if (group != null && group.getOwner().getId() == ownerId) {
+			server.removeGroup(groupId, ownerId);
+		}
 	}
 
-	//type4
-	public void addMember(int usrId, ByteBuffer data) {
-		int groupIdAdd = data.getInt();       // id de groupe dans lequel on veut ajouter un membre
-		int memberIdToAdd = data.getInt();      // id de l’utilisateur à ajouter
-		UserMsg userAjouteur = server.getUser(usrId); // L'utilisateur qui exécute l'action addMembre
-		
-		// On cherche le groupe dans le serveur où il faut ajouter un nouveau membre
+	//type 4 : ajouter un membre
+	public void addMember(int userId, ByteBuffer data) {
+		int memberIdToAdd = data.getInt();      // id du membre à ajouter
+		UserMsg userAjouteur = server.getUser(userId); // L'utilisateur qui exécute l'action addMembre
+		String groupNameRead = this.readGroupNameFromData(data);
+
+		// On cherche le groupe où il faut ajouter un nouveau membre
 		// parmi les groupes de l'utilisateur qui ajoute le nouveau membre
-		GroupMsg group = userAjouteur.getGroup(groupIdAdd);
+		// Si pas trouvé : group == null
+		GroupMsg group = userAjouteur.getGroup(groupNameRead);
 			
 		
-		// Si le groupe existe et que l'ajouteur en fait partie
-		if (group != null && group.getMembers().contains(userAjouteur)) {
+		// Si le groupe existe
+		if (group != null) {
 			UserMsg newMember = server.getUser(memberIdToAdd); // On récupère le nouveau membre à ajouter
 			// On n’ajoute le nouveau membre que s’il n’est pas déjà membre de ce groupe
 			if (!group.getMembers().contains(newMember)) {
@@ -111,29 +144,42 @@ public class ServerPacketProcessor implements PacketProcessor {
 	}
 
 
-	//type5
-	public void removeOtherMember(int usrId, ByteBuffer data) {
-		int groupId = data.getInt();
+	// type 5 : retirer un membre
+	public void removeOtherMember(int ownerId, ByteBuffer data) {
+		// Lecture du paquet
 		int memberToRemoveId = data.getInt();
-		UserMsg user = server.getUser(usrId);
-		UserMsg memberToRemove = server.getUser(memberToRemoveId);
-		// On cherche le groupe qui a groupID parmi tous les groupes auxquels appartient "user", null sinon
-		GroupMsg group = user.getGroup(groupId);
+		String groupNameRead = this.readGroupNameFromData(data);
 
-		// Si le groupe existe et que l'utilisateur user est owner de ce group
-		if (group != null && group.getOwner().getId() == usrId) {
+		UserMsg user = server.getUser(ownerId);
+		UserMsg memberToRemove = server.getUser(memberToRemoveId);
+
+		// On cherche le groupe qui a groupe ID parmi tous les groupes auxquels appartient "user", null sinon
+		GroupMsg group = user.getGroup(groupNameRead);
+
+		// Si le groupe existe et que l'utilisateur user est owner de ce groupe
+		if (group != null && group.getOwner().getId() == ownerId) {
 			group.removeMember(memberToRemove);
 		}
 	}
 	
 	// type 6
-	public void renameGroup(int usrId, ByteBuffer data) {
-		int groupId = data.getInt();
-		UserMsg user = server.getUser(usrId);
-		GroupMsg group = user.getGroup(groupId);
+	public void renameGroup(int userId, ByteBuffer data) {
+		// Lecture du paquet
+		int lengthGroupNameToChange = data.get();
+		String groupNameToChangeRead = this.readGroupNameFromData(data, lengthGroupNameToChange);
+		String newGroupNameRead = this.readGroupNameFromData(data);
+
+		UserMsg user = server.getUser(userId);
+		// On tente de récupérer le groupe à partir des
+		// groupes auxquels appartient le user
+		// => pour renommer un groupe, l'user doit faire partie
+		// du groupe 
+		// Si pas trouvé groupe == null
+		GroupMsg group = user.getGroup(groupNameToChangeRead);
 		if (group != null) {
-			//TODO readname
-			group.setName(null);
+			// Le groupe à modifier existe
+			// On modifie son nom
+			group.setName(newGroupNameRead);
 		}
 	}
 
