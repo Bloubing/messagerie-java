@@ -82,13 +82,33 @@ public class messagerieClientWindow {
 		frame.getContentPane().add(panelOptions, BorderLayout.WEST);
 		panelOptions.setLayout(new GridLayout(0, 1, 0, 0));
 
-		JRadioButton envoyer_message = new JRadioButton("Envoyer ");
+		JRadioButton envoyer_message = new JRadioButton("Envoyer message");
 		buttonGroup.add(envoyer_message);
 		panelOptions.add(envoyer_message);
 
 		JRadioButton creer_groupe = new JRadioButton("Créer groupe");
 		buttonGroup.add(creer_groupe);
 		panelOptions.add(creer_groupe);
+		
+		JRadioButton quitter_groupe = new JRadioButton("Quitter un groupe");
+		buttonGroup.add(quitter_groupe);
+		panelOptions.add(quitter_groupe);
+		
+		JRadioButton supprimer_groupe = new JRadioButton("Supprimer un groupe");
+		buttonGroup.add(supprimer_groupe);
+		panelOptions.add(supprimer_groupe);
+		
+		JRadioButton ajouter_membre = new JRadioButton("Ajouter un membre à un groupe");
+		buttonGroup.add(ajouter_membre);
+		panelOptions.add(ajouter_membre);
+		
+		JRadioButton supprimer_membre = new JRadioButton("Retirer membre d'un groupe");
+		buttonGroup.add(supprimer_membre);
+		panelOptions.add(supprimer_membre);
+		
+		JRadioButton renommer_groupe = new JRadioButton("Renommer un groupe");
+		buttonGroup.add(renommer_groupe);
+		panelOptions.add(renommer_groupe);
 
 		JButton valider = new JButton("Valider");
 	
@@ -113,11 +133,40 @@ public class messagerieClientWindow {
 				if ( envoyer_message.isSelected()) {
 					SendingFrame sf = new SendingFrame (c);
 					sf.setVisible(true);
+					sf.setDefaultCloseOperation(sf.DISPOSE_ON_CLOSE);
 				}
 				else if(creer_groupe.isSelected()) {
 					CreateGroupFrame cpf = new CreateGroupFrame(c);
 					cpf.setVisible(true);
+					cpf.setDefaultCloseOperation(cpf.DISPOSE_ON_CLOSE);
+
 				}
+				else if(quitter_groupe.isSelected()) {
+					LeaveGroupFrame lgf = new LeaveGroupFrame(c);
+					lgf.setVisible(true);
+					lgf.setDefaultCloseOperation(lgf.DISPOSE_ON_CLOSE);
+				}
+				else if(supprimer_groupe.isSelected()) {
+					DeleteGroupFrame dgf = new DeleteGroupFrame(c);
+					dgf.setVisible(true);
+					dgf.setDefaultCloseOperation(dgf.DISPOSE_ON_CLOSE);
+				}
+				else if(ajouter_membre.isSelected()) {
+					AddMemberFrame amf = new AddMemberFrame(c);
+					amf.setVisible(true);
+					amf.setDefaultCloseOperation(amf.DISPOSE_ON_CLOSE);
+				}
+				else if(supprimer_membre.isSelected()) {
+					RemoveMemberFrame rmf = new RemoveMemberFrame(c);
+					rmf.setVisible(true);
+					rmf.setDefaultCloseOperation(rmf.DISPOSE_ON_CLOSE);
+				}
+				else if(renommer_groupe.isSelected()) {
+					RenameGroupFrame rgf = new RenameGroupFrame(c);
+					rgf.setVisible(true);
+					rgf.setDefaultCloseOperation(rgf.DISPOSE_ON_CLOSE);
+				}
+			
 			}
 		});
 	}

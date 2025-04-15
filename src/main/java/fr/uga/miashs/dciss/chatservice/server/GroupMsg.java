@@ -17,7 +17,6 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import fr.uga.miashs.dciss.chatservice.common.Packet;
 
 public class GroupMsg implements PacketProcessor {
-
 	private int groupId;
 	private UserMsg owner;
 	private Set<UserMsg> members;

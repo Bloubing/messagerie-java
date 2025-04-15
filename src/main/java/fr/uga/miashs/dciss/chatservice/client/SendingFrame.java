@@ -67,7 +67,7 @@ public class SendingFrame extends JFrame {
 		panel_1.add(id, BorderLayout.CENTER);
 		id.setColumns(10);
 		
-		JLabel idDest = new JLabel("Id dest :");
+		JLabel idDest = new JLabel("Id membre ou groupe : ");
 		panel_1.add(idDest, BorderLayout.WEST);
 		
 		JButton envoyer = new JButton("Envoyer");
