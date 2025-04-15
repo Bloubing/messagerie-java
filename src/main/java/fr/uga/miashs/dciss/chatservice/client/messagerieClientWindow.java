@@ -60,14 +60,13 @@ public class messagerieClientWindow {
 	 */
 	private void initialize() throws Exception {
 		c = new ClientMsg("localhost", 1666);
-		c.addMessageListener(p -> message_du_serveur.setText(p.srcId + " says to " + p.destId + ": " + new String(p.data)));
 		// add a connection listener that exit application when connection closed
 		c.addConnectionListener(active -> {
 			if (!active)
 				System.exit(0);
 		});
 		c.startSession();
-		c.sendPacket(2, "hey".getBytes());
+		
 		frame = new JFrame();
 		frame.setBounds(100, 100, 1400, 400);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -104,7 +103,8 @@ public class messagerieClientWindow {
 		message_du_serveur.setEditable(false);
 		message_du_serveur.setBackground(new Color(154, 153, 150));
 		messages.add(message_du_serveur);
-		
+		c.addMessageListener(p -> message_du_serveur.setText(p.srcId + " says to " + p.destId + ": " + new String(p.data)));
+
 		JLabel messageServeurTitre = new JLabel("DERNIER MESSAGE : ");
 		messageServeurTitre.setHorizontalAlignment(SwingConstants.CENTER);
 		messages.add(messageServeurTitre, BorderLayout.NORTH);

@@ -24,6 +24,7 @@ public class CreateGroupFrame extends JFrame {
 	private JPanel contentPane;
 	private JTextField textField;
 	private ArrayList<Integer> membres = new ArrayList<Integer>();
+	private JTextField nom;
 
 
 	/**
@@ -87,17 +88,33 @@ public class CreateGroupFrame extends JFrame {
 			}
 		});
 		
+		JPanel selectionNom = new JPanel();
+		panel.add(selectionNom);
+		selectionNom.setLayout(new GridLayout(1, 0, 0, 0));
+		
+		JLabel nomGroupeLabel = new JLabel("Choisissez un nom :");
+		nomGroupeLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		selectionNom.add(nomGroupeLabel);
+		
+		nom = new JTextField();
+		selectionNom.add(nom);
+		nom.setColumns(10);
+		
 		JButton creer = new JButton("Creer Groupe");
 		creer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(membres.size()>0) {
-					ByteBuffer data = ByteBuffer.allocate(8+(membres.size()*4));
+				if(membres.size()>0 && nom.getText().length() > 0) {
+					String nomGroupe = nom.getText();
+					ByteBuffer data = ByteBuffer.allocate(8+(membres.size()*4)+(nomGroupe.length()*2));
 					data.putInt(1);
 					// on met le type de paquet ( 1 pour création de Groupe )
 					data.putInt(membres.size());
 					// on met la longueur du paquet;
 					for ( Integer idMembre : membres) {
 						data.putInt(idMembre);
+					}
+					for(int i = 0; i < nomGroupe.length(); i++) {
+						data.putChar(nomGroupe.charAt(i));
 					}
 					c.sendPacket(0, data.array());
 					// On envoit au destinaire 0 car création groupe, et avec le tableau de bytes;
@@ -107,6 +124,7 @@ public class CreateGroupFrame extends JFrame {
 			}
 		});
 		panel.add(creer);
+
 
 		
 	}
