@@ -13,7 +13,6 @@ package fr.uga.miashs.dciss.chatservice.server;
 import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.*;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
 
 import fr.uga.miashs.dciss.chatservice.common.Packet;
@@ -31,11 +30,13 @@ public class UserMsg implements PacketProcessor{
 	private transient boolean active;
 	
 	private BlockingQueue<Packet> sendQueue;
+	private String name = "utilisateur";
 	
 	public UserMsg(int clientId, ServerMsg server) {
 		if (clientId<1) throw new IllegalArgumentException("id must not be less than 0");
 		this.server=server;
 		this.userId=clientId;
+		this.name = "utilisateur_" + clientId; // le nom par défault
 		active=false;
 		sendQueue = new LinkedBlockingQueue<>();
 		groups = Collections.synchronizedSet(new HashSet<>());
@@ -151,5 +152,16 @@ public class UserMsg implements PacketProcessor{
 	public void process(Packet p) {
 		sendQueue.offer(p);
 	}
+
+	// méthode pour changer le nom d'utilisateur
+	public void setName(String name) {
+		if (name != null) this.name = name;
+	}
 	
+	// méthode qui renvoie le nom d'utilisateur actuel
+	public String getName() {
+		return name;
+	}
+
+
 }
