@@ -13,7 +13,6 @@ package fr.uga.miashs.dciss.chatservice.server;
 import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.*;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
 
 import fr.uga.miashs.dciss.chatservice.common.Packet;
@@ -68,6 +67,18 @@ public class UserMsg implements PacketProcessor{
 	// to be used carrefully, do not add groups directly
 	protected Set<GroupMsg> getGroups() {
 		return groups;
+	}
+
+	public GroupMsg getGroup(int groupId) {
+		GroupMsg group = null;
+		for (GroupMsg g : this.getGroups()) {
+			if (g.getId() == groupId) {
+				group = g;
+				break;
+			}
+		}
+		return group;
+		
 	}
 	
 	/*

@@ -12,6 +12,8 @@
 package fr.uga.miashs.dciss.chatservice.server;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.logging.Logger;
 
 import fr.uga.miashs.dciss.chatservice.common.Packet;
@@ -32,20 +34,16 @@ public class ServerPacketProcessor implements PacketProcessor {
 		int type = buf.getInt();
 		System.out.println("le type est"+type);
 		if (type == 1) { // cas creation de groupe
-			createGroup(p.srcId, buf);
+			this.createGroup(p.srcId, buf);
 		} else if (type == 2) {
-			removeUser(p.srcId, buf);
+			this.removeUser(p.srcId, buf);
 		} else if (type == 3) {
-			removeGroup(p.srcId, buf);
+			this.removeGroup(p.srcId, buf);
 		} else if (type == 4) {
-			addMember(p.srcId, buf);
+			this.addMember(p.srcId, buf);
 		} else if (type == 5) {
-			retirerUser(p.srcId, buf);
-		} else if (type == 6) {
-			setName(p.srcId, buf);
-		} else if (type == 8) {
-    		sendGroupMembers(p.srcId, buf);
-		}
+			this.removeOtherMember(p.srcId, buf);
+		} 
 		else {
 			LOG.warning("Server message of type=" + type + " not handled by procesor");
 		}
@@ -55,24 +53,24 @@ public class ServerPacketProcessor implements PacketProcessor {
 
 	// type1
 	public void createGroup(int ownerId, ByteBuffer data) {
-		int nb = data.getInt();
+		int nbMembres = data.getInt();
+		
 		GroupMsg g = server.createGroup(ownerId);
-		for (int i = 0; i < nb; i++) {
+		for (int i = 0; i < nbMembres; i++) {
 			g.addMember(server.getUser(data.getInt()));
 		}
+
+		// Lire le nom du groupe
+		StringBuffer nomGroupe = new StringBuffer();
+		
 	}
 
-	//type2
+	//type 2 : quitter un groupe
 	public void removeUser(int usrId, ByteBuffer data) {
 		UserMsg usr = server.getUser(usrId);
 		int groupId = data.getInt();
-		GroupMsg group = null;
-    	for (GroupMsg g : usr.getGroups()) {
-      		  if (g.getId() == groupId) {
-            	group = g;
-            	break;
-        	}
-		}
+		// On récupère le group, null sinon
+		GroupMsg group = usr.getGroup(groupId);
 		if (group != null && group.getMembers().contains(usr)) {
         group.removeMember(usr);
     	}
@@ -81,108 +79,84 @@ public class ServerPacketProcessor implements PacketProcessor {
 	// type3
 	public void removeGroup(int ownerId, ByteBuffer data) {
 		int idGroupe = data.getInt();
-	
-		int nbMembres = data.getInt();
-		server.removeGroup(idGroupe);
+		server.removeGroup(idGroupe, ownerId);
 	}
 
 	//type4
 	public void addMember(int usrId, ByteBuffer data) {
 		int groupIdAdd = data.getInt();       // id de groupe dans lequel on veut ajouter un membre
-		int memberToAdd = data.getInt();      // id de l’utilisateur à ajouter
-		UserMsg user = server.getUser(usrId); // L'utilisateur qui exécute l'action addMembre
-		GroupMsg group = null;
-		// On cherche le groupe ciblé parmi groups qui appartient "user"
-		for (GroupMsg g : user.getGroups()) {
-			if (g.getId() == groupIdAdd) {
-				group = g;
-				break;
-			}
-		}
-		// Si le groupe existe et que l'utilisateur en fait partie
-		if (group != null && group.getMembers().contains(user)) {
-			UserMsg target = server.getUser(memberToAdd); // On récupère l'utilisateur à ajouter
-			// On n’ajoute l’utilisateur que s’il n’est pas déjà membre de ce groupe
-			if (!group.getMembers().contains(target)) {
-				group.addMember(target);
+		int memberIdToAdd = data.getInt();      // id de l’utilisateur à ajouter
+		UserMsg userAjouteur = server.getUser(usrId); // L'utilisateur qui exécute l'action addMembre
+		
+		// On cherche le groupe dans le serveur où il faut ajouter un nouveau membre
+		// parmi les groupes de l'utilisateur qui ajoute le nouveau membre
+		GroupMsg group = userAjouteur.getGroup(groupIdAdd);
+			
+		
+		// Si le groupe existe et que l'ajouteur en fait partie
+		if (group != null && group.getMembers().contains(userAjouteur)) {
+			UserMsg newMember = server.getUser(memberIdToAdd); // On récupère le nouveau membre à ajouter
+			// On n’ajoute le nouveau membre que s’il n’est pas déjà membre de ce groupe
+			if (!group.getMembers().contains(newMember)) {
+				group.addMember(newMember);
 			}
 		}
 	}
 
 
 	//type5
-	public void retirerUser(int usrId, ByteBuffer data) {
-		int memberToRemoveId = data.getInt();
+	public void removeOtherMember(int usrId, ByteBuffer data) {
 		int groupId = data.getInt();
+		int memberToRemoveId = data.getInt();
 		UserMsg user = server.getUser(usrId);
 		UserMsg memberToRemove = server.getUser(memberToRemoveId);
-		// On cherche le groupe ciblé parmi groups qui appartient "user"
-		GroupMsg group = null;
-		for (GroupMsg g : user.getGroups()) {
-			if (g.getId() == groupId) {
-				group = g;
-				break;
-			}
-		}
+		// On cherche le groupe qui a groupID parmi tous les groupes auxquels appartient "user", null sinon
+		GroupMsg group = user.getGroup(groupId);
+
 		// Si le groupe existe et que l'utilisateur user est owner de ce group
-		if (group != null && group.getOwner().equals(user)) {
+		if (group != null && group.getOwner().getId() == usrId) {
 			group.removeMember(memberToRemove);
 		}
 	} 
 
 
-	//type6
-	 public void setName(int usrId, ByteBuffer data){
-		byte[] nameBytes = new byte[data.remaining()]; //残りの長さ分のバイト配列を用意
-		data.get(nameBytes); //現在のポジションからnameBytes.length バイトを読み取りnameBytesに書き込み
-		String newName = new String(nameBytes, StandardCharsets.UTF_8); // バイト列を文字列（String）に変換
-		UserMsg u = server.getUser(usrId);
-		if (u != null) {
-			u.setName(newName);
-			System.out.println("User " + usrId + " changed name to " + newName);
-		}
-	}
+	// //type6
+	//  public void setName(int usrId, ByteBuffer data){
+	// 	byte[] nameBytes = new byte[data.remaining()]; //残りの長さ分のバイト配列を用意
+	// 	data.get(nameBytes); //現在のポジションからnameBytes.length バイトを読み取りnameBytesに書き込み
+	// 	String newName = new String(nameBytes, StandardCharsets.UTF_8); // バイト列を文字列（String）に変換
+	// 	UserMsg u = server.getUser(usrId);
+	// 	if (u != null) {
+	// 		u.setName(newName);
+	// 		System.out.println("User " + usrId + " changed name to " + newName);
+	// 	}
+	// }
 
 
-	//type8
-	public void sendGroupMembers(int usrId, ByteBuffer data) {
-		int groupId = data.getInt();
-		GroupMsg group = server.getGroup(groupId);
-		if (group == null) { // si le groupe n'existe pas
-			sendError(requesterId, "Le groupe demandé n'existe pas.");
-			return;
-		}
-		List<UserMsg> members = group.getMembers(); //group というSetから、参加しているメンバーのリストを取得
-		ByteBuffer response = ByteBuffer.allocate(1 + 4 + members.size() * 4);  //送信用のバイナリバッファを作成サイズを指定。
-		//type+メンバー数+各ユーザーのID（int）
-		response.put((byte)8); // ecrire type
-		response.putInt(members.size()); // ecrirenb de membre
-		for (UserMsg user : members) {  //ecrire userIds
-			response.putInt(user.getId()); // si on a aussi nickname comme un attribut de UserMsg modifiez ici
-		}
-		Packet p = new Packet(0, usrId, response.array());
-		UserMsg dest = server.getUser(requesterId);
-		if (dest != null) {
-			dest.process(p);  //usrIDを持つuserにパケットを渡す
-		}
-	}
+	// //type8
+	// public void sendGroupMembers(int usrId, ByteBuffer data) {
+	// 	int groupId = data.getInt();
+	// 	GroupMsg group = server.getGroup(groupId);
+	// 	if (group == null) { // si le groupe n'existe pas
+	// 		sendError(requesterId, "Le groupe demandé n'existe pas.");
+	// 		return;
+	// 	}
+	// 	List<UserMsg> members = group.getMembers(); //group というSetから、参加しているメンバーのリストを取得
+	// 	ByteBuffer response = ByteBuffer.allocate(1 + 4 + members.size() * 4);  //送信用のバイナリバッファを作成サイズを指定。
+	// 	//type+メンバー数+各ユーザーのID（int）
+	// 	response.put((byte)8); // ecrire type
+	// 	response.putInt(members.size()); // ecrirenb de membre
+	// 	for (UserMsg user : members) {  //ecrire userIds
+	// 		response.putInt(user.getId()); // si on a aussi nickname comme un attribut de UserMsg modifiez ici
+	// 	}
+	// 	Packet p = new Packet(0, usrId, response.array());
+	// 	UserMsg dest = server.getUser(requesterId);
+	// 	if (dest != null) {
+	// 		dest.process(p);  //usrIDを持つuserにパケットを渡す
+	// 	}
+	// }
 }
 
-/* contenue de data(donnée de l'action)
-* type1: 1. nb de membre
-         2. ID de membre à ajouter
-		 3. ID de membre à ajouter
-		 .
-		 . autant que le nb de membre...
-		 .
-* type2: 1. ID du groupe
-* type3: 1. ID du groupe
-         2. nb de membre
-* type4: 1. ID du groupe
-         2. ID de user qui va être ajouté
-* type5: 1. ID de user qui sera être supprimé du groupe (pas utilisateur qui exécute l'action)
-         2. ID du groupe
-*/
 
 
 

@@ -63,7 +63,7 @@ public class ServerMsg {
 	}
 	
 	public boolean removeGroup(int groupId, int userId) {
-		if (!(groups.get(groupId).getOwner().getId() == userId)) {
+		if (groups.get(groupId).getOwner().getId() != userId) {
 		// Action non autorisée : l'utilisateur qui essaie de supprimer
 		// le groupe n'est pas l'owner
 			return false;
@@ -72,6 +72,7 @@ public class ServerMsg {
 		GroupMsg g =groups.remove(groupId);
 		if (g==null) return false;
 		g.beforeDelete();
+		
 		return true;
 	}
 	
@@ -84,6 +85,10 @@ public class ServerMsg {
 	
 	public UserMsg getUser(int userId) {
 		return users.get(userId);
+	}
+
+	public Map<Integer, GroupMsg> getGroups() {
+		return this.groups;
 	}
 	
 	// Methode utilisée pour savoir quoi faire d'un paquet
