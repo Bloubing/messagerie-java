@@ -43,7 +43,9 @@ public class ServerPacketProcessor implements PacketProcessor {
 			this.addMember(p.srcId, buf);
 		} else if (type == 5) {
 			this.removeOtherMember(p.srcId, buf);
-		} 
+		} else if (type == 6) {
+			this.renameGroup(p.srcId, buf);
+		}
 		else {
 			LOG.warning("Server message of type=" + type + " not handled by procesor");
 		}
@@ -122,44 +124,21 @@ public class ServerPacketProcessor implements PacketProcessor {
 		if (group != null && group.getOwner().getId() == usrId) {
 			group.removeMember(memberToRemove);
 		}
-	} 
+	}
+	
+	// type 6
+	public void renameGroup(int usrId, ByteBuffer data) {
+		int groupId = data.getInt();
+		UserMsg user = server.getUser(usrId);
+		GroupMsg group = user.getGroup(groupId);
+		if (group != null) {
+			//TODO readname
+			group.setName(null);
+		}
+	}
 
 
-	// //type6
-	//  public void setName(int usrId, ByteBuffer data){
-	// 	byte[] nameBytes = new byte[data.remaining()]; //残りの長さ分のバイト配列を用意
-	// 	data.get(nameBytes); //現在のポジションからnameBytes.length バイトを読み取りnameBytesに書き込み
-	// 	String newName = new String(nameBytes, StandardCharsets.UTF_8); // バイト列を文字列（String）に変換
-	// 	UserMsg u = server.getUser(usrId);
-	// 	if (u != null) {
-	// 		u.setName(newName);
-	// 		System.out.println("User " + usrId + " changed name to " + newName);
-	// 	}
-	// }
 
-
-	// //type8
-	// public void sendGroupMembers(int usrId, ByteBuffer data) {
-	// 	int groupId = data.getInt();
-	// 	GroupMsg group = server.getGroup(groupId);
-	// 	if (group == null) { // si le groupe n'existe pas
-	// 		sendError(requesterId, "Le groupe demandé n'existe pas.");
-	// 		return;
-	// 	}
-	// 	List<UserMsg> members = group.getMembers(); //group というSetから、参加しているメンバーのリストを取得
-	// 	ByteBuffer response = ByteBuffer.allocate(1 + 4 + members.size() * 4);  //送信用のバイナリバッファを作成サイズを指定。
-	// 	//type+メンバー数+各ユーザーのID（int）
-	// 	response.put((byte)8); // ecrire type
-	// 	response.putInt(members.size()); // ecrirenb de membre
-	// 	for (UserMsg user : members) {  //ecrire userIds
-	// 		response.putInt(user.getId()); // si on a aussi nickname comme un attribut de UserMsg modifiez ici
-	// 	}
-	// 	Packet p = new Packet(0, usrId, response.array());
-	// 	UserMsg dest = server.getUser(requesterId);
-	// 	if (dest != null) {
-	// 		dest.process(p);  //usrIDを持つuserにパケットを渡す
-	// 	}
-	// }
 }
 
 
