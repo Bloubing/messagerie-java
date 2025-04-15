@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Mon Apr 14 09:50:27 CEST 2025:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.15.2.0 - (1873585): instance a816c00e-0196-3347-35da-000006af3990 
+on database directory /home/coursmiashs/eclipse-workspace/messagerie/target/sample with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@11524711 
+Loaded from file:/home/coursmiashs/.m2/repository/org/apache/derby/derby/10.15.2.0/derby-10.15.2.0.jar
+java.vendor=Eclipse Adoptium
+java.runtime.version=21.0.5+11-LTS
+user.dir=/home/coursmiashs/eclipse-workspace/messagerie
+os.name=Linux
+os.arch=amd64
+os.version=6.11.0-21-generic
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''

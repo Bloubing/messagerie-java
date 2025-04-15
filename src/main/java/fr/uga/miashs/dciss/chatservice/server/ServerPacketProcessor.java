@@ -28,8 +28,9 @@ public class ServerPacketProcessor implements PacketProcessor {
 	public void process(Packet p) {
 		// ByteBufferVersion. On aurait pu utiliser un ByteArrayInputStream + DataInputStream à la place
 		ByteBuffer buf = ByteBuffer.wrap(p.data);
-		byte type = buf.get();
 		
+		int type = buf.getInt();
+		System.out.println("le type est"+type);
 		if (type == 1) { // cas creation de groupe
 			createGroup(p.srcId, buf);
 		} else if (type == 2) {
@@ -41,6 +42,8 @@ public class ServerPacketProcessor implements PacketProcessor {
 		} else if (type == 5) {
 			retirerUser(p.srcId, buf);
 		} else if (type == 6) {
+			setName(p.srcId, buf);
+		} else if (type == 8) {
     		sendGroupMembers(p.srcId, buf);
 		}
 		else {
@@ -48,6 +51,7 @@ public class ServerPacketProcessor implements PacketProcessor {
 		}
 	}
 	
+
 
 	// type1
 	public void createGroup(int ownerId, ByteBuffer data) {
@@ -125,6 +129,19 @@ public class ServerPacketProcessor implements PacketProcessor {
 			group.removeMember(memberToRemove);
 		}
 	} 
+
+
+	//type6
+	 public void setName(int usrId, ByteBuffer data){
+		byte[] nameBytes = new byte[data.remaining()]; //残りの長さ分のバイト配列を用意
+		data.get(nameBytes); //現在のポジションからnameBytes.length バイトを読み取りnameBytesに書き込み
+		String newName = new String(nameBytes, StandardCharsets.UTF_8); // バイト列を文字列（String）に変換
+		UserMsg u = server.getUser(usrId);
+		if (u != null) {
+			u.setName(newName);
+			System.out.println("User " + usrId + " changed name to " + newName);
+		}
+	}
 
 
 	//type8

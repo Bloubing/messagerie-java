@@ -25,6 +25,7 @@ public class UserMsg implements PacketProcessor{
 	
 	private int userId;
 	private Set<GroupMsg> groups;
+	private String name;
 	
 	private ServerMsg server;
 	private transient Socket s;
@@ -36,6 +37,7 @@ public class UserMsg implements PacketProcessor{
 		if (clientId<1) throw new IllegalArgumentException("id must not be less than 0");
 		this.server=server;
 		this.userId=clientId;
+		this.name = "user" + clientId; //  default name
 		active=false;
 		sendQueue = new LinkedBlockingQueue<>();
 		groups = Collections.synchronizedSet(new HashSet<>());
@@ -44,6 +46,16 @@ public class UserMsg implements PacketProcessor{
 	public int getId() {
 		return userId;
 	}
+
+	public String getName() {
+    	return name;
+	}
+
+	public void setName(String name) {
+   		this.name = name;
+	}
+
+
 	
 	public boolean removeGroup(GroupMsg g) {
 		if (groups.remove(g)) {

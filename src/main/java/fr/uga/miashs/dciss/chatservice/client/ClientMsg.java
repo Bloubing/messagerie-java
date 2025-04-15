@@ -14,9 +14,9 @@ package fr.uga.miashs.dciss.chatservice.client;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import fr.uga.miashs.dciss.chatservice.common.Packet;
 
 /**
@@ -223,12 +223,36 @@ public class ClientMsg {
 		String lu = null;
 		while (!"\\quit".equals(lu)) {
 			try {
-				System.out.println("A qui voulez vous écrire ? ");
+				System.out.println("Que voulez vous faire ? 0 : écrire, 1 créer un groupe, 2 quitter un groupe, 3 suprimer un groupe, 4 ajouter un membre, 5 retirer un membre");
+				int type = Integer.parseInt(sc.nextLine());				
+				if ( type == 0) { //message classique
+				System.out.println("à qui voulez-vous écrire");
 				int dest = Integer.parseInt(sc.nextLine());
-
 				System.out.println("Votre message ? ");
 				lu = sc.nextLine();
 				c.sendPacket(dest, lu.getBytes());
+				}
+				else if( type == 1) {
+					ArrayList<Integer> membres= new ArrayList<Integer>();
+					System.out.println("Ajouter id membre : (-1) pour stopper");
+					int membre = Integer.parseInt(sc.nextLine());
+					while( membre != -1) {
+						membres.add(membre);
+						System.out.println("Ajouter id membre : (-1) pour stopper");
+						membre = Integer.parseInt(sc.nextLine());
+					}
+					ByteBuffer data = ByteBuffer.allocate(8+(membres.size()*4));
+					data.putInt(type);
+					data.putInt(membres.size());
+					for ( Integer idMembre : membres) {
+						data.putInt(idMembre);
+					}
+					for ( byte b : data.array()) {
+						System.out.println(b);
+					}
+					c.sendPacket(0, data.array());
+					
+				}
 			} catch (InputMismatchException | NumberFormatException e) {
 				System.out.println("Mauvais format");
 			}
