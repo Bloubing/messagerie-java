@@ -97,7 +97,7 @@ public class RenameGroupFrame extends JFrame {
 						data.putChar(nomGroupe.charAt(i));
 					}
 					for(int i = 0; i < nouveauNomString.length(); i++) {
-						data.putChar(nomGroupe.charAt(i));
+						data.putChar(nouveauNomString.charAt(i));
 					}
 					c.sendPacket(0, data.array());
 					// On envoit au destinaire 0 car création groupe, et avec le tableau de bytes;
