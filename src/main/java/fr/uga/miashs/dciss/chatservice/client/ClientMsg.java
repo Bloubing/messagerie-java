@@ -221,7 +221,7 @@ public class ClientMsg {
 		String lu = null;
 		while (!"\\quit".equals(lu)) {
 			try {
-				System.out.println("Que voulez vous faire ? 0 : écrire, 1 créer un groupe, 2 quitter un groupe, 3 suprimer un groupe, 4 ajouter un membre, 5 retirer un membre, 6 définir un nom d’utilisateur, 7 définir le nom un groupe, 8 renommer un membre, 9 renommer un groupe");
+				System.out.println("Que voulez vous faire ? 0 : écrire, 1 créer un groupe, 2 quitter un groupe, 3 suprimer un groupe, 4 ajouter un membre, 5 retirer un membre, 6 renommer un groupe");
 				int type = Integer.parseInt(sc.nextLine());				
 				if ( type == 0) { //message classique
 				System.out.println("à qui voulez-vous écrire");
