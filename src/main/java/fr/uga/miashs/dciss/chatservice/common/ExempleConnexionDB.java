@@ -137,6 +137,101 @@ public class ExempleConnexionDB {
         }
 
 
+        //Exemple de la création et insertion dans la table user_group
+		try (Connection cnx = DriverManager.getConnection(url)) {
+            System.out.println("Connexion réussie à SQLite.");
+
+			cnx.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS user_group (id_relationship_ug INTEGER PRIMARY KEY AUTOINCREMENT, id_user INTEGER, id_group INTEGER,  FOREIGN KEY (id_user) REFERENCES user(id_u), FOREIGN KEY (id_group) REFERENCES groupe(id_g))");
+
+            PreparedStatement pstmt = cnx.prepareStatement("INSERT INTO user_group (id_user, id_group) VALUES (?, ?)");
+			
+			pstmt.setInt(1, 1);  
+			pstmt.setInt(2, 1);   
+			
+			boolean inserted = pstmt.executeUpdate()==1;
+
+
+            // Afficher les relations user-group
+            String selectSQL = "SELECT * FROM user_group";
+            try (Statement stmt = cnx.createStatement(); ResultSet res = stmt.executeQuery(selectSQL)) {
+                System.out.println("Liste des relations :");
+                while (res.next()) {
+                    int id_user = res.getInt("id_user");
+					int id_group = res.getInt("id_group");
+                    System.out.println(id_user + " | " + id_group);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erreur SQLite:");
+            e.printStackTrace();
+        }
+
+
+        //Exemple de la création et insertion dans la table conversation_client
+		try (Connection cnx = DriverManager.getConnection(url)) {
+            System.out.println("Connexion réussie à SQLite.");
+
+			cnx.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS conversation_client (id INTEGER PRIMARY KEY AUTOINCREMENT, member INTEGER NOT NULL CHECK(member != 0))");
+
+            PreparedStatement pstmt = cnx.prepareStatement("INSERT INTO conversation_client (member) VALUES (?)");
+			
+			pstmt.setInt(1, 1);     
+			
+			boolean inserted = pstmt.executeUpdate()==1;
+
+
+            // Afficher les relations conversation_client
+            String selectSQL = "SELECT * FROM conversation_client";
+            try (Statement stmt = cnx.createStatement(); ResultSet res = stmt.executeQuery(selectSQL)) {
+                System.out.println("Liste des conversations :");
+                while (res.next()) {
+                    int id = res.getInt("id");
+					int membre = res.getInt("member");
+                    System.out.println(id + " | " + membre);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erreur SQLite:");
+            e.printStackTrace();
+        }
+
+
+        //Exemple de la création et insertion dans la table message_client
+		try (Connection cnx = DriverManager.getConnection(url)) {
+            System.out.println("Connexion réussie à SQLite.");
+
+			cnx.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS message_client (id INTEGER PRIMARY KEY AUTOINCREMENT, content TEXT, id_forwarder INTEGER NOT NULL, id_recipient INTEGER NOT NULL, FOREIGN KEY (id_forwarder) REFERENCES user(id_u), FOREIGN KEY (id_recipient) REFERENCES user(id_u) )");
+
+            PreparedStatement pstmt = cnx.prepareStatement("INSERT INTO message_client (content, id_forwarder, id_recipient) VALUES (?, ?, ?)");
+			
+            pstmt.setString(1, "Privet!"); 
+            pstmt.setInt(2, 1); 
+			pstmt.setInt(3, 1);     
+			
+			boolean inserted = pstmt.executeUpdate()==1;
+
+
+            // Afficher les relations message_client
+            String selectSQL = "SELECT * FROM message_client";
+            try (Statement stmt = cnx.createStatement(); ResultSet res = stmt.executeQuery(selectSQL)) {
+                System.out.println("Liste des messages :");
+                while (res.next()) {
+                    int id = res.getInt("id");
+                    String content = res.getString("content");
+                    int forwarder = res.getInt("id_forwarder");
+					int recipient = res.getInt("id_recipient");
+                    System.out.println(id + " | " + content + " | " + forwarder + " | " + recipient);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erreur SQLite:");
+            e.printStackTrace();
+        }
+
+
     }
 
 
