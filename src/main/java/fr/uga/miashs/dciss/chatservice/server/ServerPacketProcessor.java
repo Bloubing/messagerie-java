@@ -82,14 +82,16 @@ public class ServerPacketProcessor implements PacketProcessor {
 		for (int i = 0; i < nbMembres; i++) {
 			g.addMember(server.getUser(data.getInt()));
 		}
-
+		
 		String groupNameRead = this.readGroupNameFromData(data);
 		g.setName(groupNameRead);
 		
+		LOG.info("Groupe créé avec le nom de" + g.getName());
 	}
 	
 	//type 2 : quitter un groupe
 	public void removeUser(int userId, ByteBuffer data) {
+		System.out.println("rentré dans type2");
 		UserMsg user = server.getUser(userId);
 		String groupNameRead = this.readGroupNameFromData(data);
 		// On cherche le groupe à quitter parmi 
@@ -99,8 +101,10 @@ public class ServerPacketProcessor implements PacketProcessor {
 
 		// Si le groupe existe
 		if (group != null) {
-        group.removeMember(user);
-    	}
+			group.removeMember(user);
+			LOG.info("User: " + userId + "a quitté le groupe " + group.getName());
+
+		}
 	}
 
 	// type 3 : supprimer un groupe
@@ -118,7 +122,11 @@ public class ServerPacketProcessor implements PacketProcessor {
 		// et que l'utilisateur est owner
 		if (group != null && group.getOwner().getId() == ownerId) {
 			server.removeGroup(groupId, ownerId);
+			LOG.info("Le groupe" + group.getName() + " a été supprimé");
+
 		}
+
+
 	}
 
 	//type 4 : ajouter un membre
@@ -139,8 +147,11 @@ public class ServerPacketProcessor implements PacketProcessor {
 			// On n’ajoute le nouveau membre que s’il n’est pas déjà membre de ce groupe
 			if (!group.getMembers().contains(newMember)) {
 				group.addMember(newMember);
+			LOG.info("Membre: " + memberIdToAdd + "a été ajouté au groupe " + group.getName() + " par " + userId);
+
 			}
 		}
+
 	}
 
 
@@ -159,7 +170,10 @@ public class ServerPacketProcessor implements PacketProcessor {
 		// Si le groupe existe et que l'utilisateur user est owner de ce groupe
 		if (group != null && group.getOwner().getId() == ownerId) {
 			group.removeMember(memberToRemove);
+			LOG.info("User: " + memberToRemoveId + "a été retiré du groupe " + group.getName() + " par " + ownerId);
+
 		}
+
 	}
 	
 	// type 6
@@ -180,6 +194,8 @@ public class ServerPacketProcessor implements PacketProcessor {
 			// Le groupe à modifier existe
 			// On modifie son nom
 			group.setName(newGroupNameRead);
+			LOG.info("User: " + userId + "a renommé le groupe " + groupNameToChangeRead + "en " + group.getName());
+
 		}
 	}
 
