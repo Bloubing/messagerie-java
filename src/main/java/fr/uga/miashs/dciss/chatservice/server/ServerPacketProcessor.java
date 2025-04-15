@@ -61,8 +61,13 @@ public class ServerPacketProcessor implements PacketProcessor {
 		}
 
 		// Lire le nom du groupe
-		StringBuffer nomGroupe = new StringBuffer();
+		StringBuffer groupNameBuffer = new StringBuffer();
 		
+		while (data.hasRemaining()) {
+			groupNameBuffer.append(data.getChar());
+		}
+		String groupName = groupNameBuffer.toString();
+		g.setName(groupName);
 	}
 
 	//type 2 : quitter un groupe
