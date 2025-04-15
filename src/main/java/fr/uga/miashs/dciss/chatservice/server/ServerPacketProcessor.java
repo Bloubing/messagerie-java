@@ -40,7 +40,9 @@ public class ServerPacketProcessor implements PacketProcessor {
 			addMember(p.srcId, buf);
 		} else if (type == 5) {
 			retirerUser(p.srcId, buf);
-		}	
+		} else if (type == 6) {
+    		sendGroupMembers(p.srcId, buf);
+		}
 		else {
 			LOG.warning("Server message of type=" + type + " not handled by procesor");
 		}
@@ -106,23 +108,48 @@ public class ServerPacketProcessor implements PacketProcessor {
 
 	//type5
 	public void retirerUser(int usrId, ByteBuffer data) {
-    int memberToRemoveId = data.getInt();
-    int groupId = data.getInt();
-    UserMsg user = server.getUser(usrId);
-    UserMsg memberToRemove = server.getUser(memberToRemoveId);
-	// On cherche le groupe ciblé parmi groups qui appartient "user"
-    GroupMsg group = null;
-    for (GroupMsg g : user.getGroups()) {
-        if (g.getId() == groupId) {
-            group = g;
-            break;
-        }
+		int memberToRemoveId = data.getInt();
+		int groupId = data.getInt();
+		UserMsg user = server.getUser(usrId);
+		UserMsg memberToRemove = server.getUser(memberToRemoveId);
+		// On cherche le groupe ciblé parmi groups qui appartient "user"
+		GroupMsg group = null;
+		for (GroupMsg g : user.getGroups()) {
+			if (g.getId() == groupId) {
+				group = g;
+				break;
+			}
+		}
+		// Si le groupe existe et que l'utilisateur user est owner de ce group
+		if (group != null && group.getOwner().equals(user)) {
+			group.removeMember(memberToRemove);
+		}
+	} 
+
+
+	//type8
+	public void sendGroupMembers(int usrId, ByteBuffer data) {
+		int groupId = data.getInt();
+		GroupMsg group = server.getGroup(groupId);
+		if (group == null) { // si le groupe n'existe pas
+			sendError(requesterId, "Le groupe demandé n'existe pas.");
+			return;
+		}
+		List<UserMsg> members = group.getMembers(); //group というSetから、参加しているメンバーのリストを取得
+		ByteBuffer response = ByteBuffer.allocate(1 + 4 + members.size() * 4);  //送信用のバイナリバッファを作成サイズを指定。
+		//type+メンバー数+各ユーザーのID（int）
+		response.put((byte)8); // ecrire type
+		response.putInt(members.size()); // ecrirenb de membre
+		for (UserMsg user : members) {  //ecrire userIds
+			response.putInt(user.getId()); // si on a aussi nickname comme un attribut de UserMsg modifiez ici
+		}
+		Packet p = new Packet(0, usrId, response.array());
+		UserMsg dest = server.getUser(requesterId);
+		if (dest != null) {
+			dest.process(p);  //usrIDを持つuserにパケットを渡す
+		}
 	}
-	// Si le groupe existe et que l'utilisateur user est owner de ce group
-	if (group != null && group.getOwner().equals(user)) {
-		group.removeMember(memberToRemove);
-	}
-} 
+}
 
 /* contenue de data(donnée de l'action)
 * type1: 1. nb de membre
