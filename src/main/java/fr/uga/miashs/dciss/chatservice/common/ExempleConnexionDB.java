@@ -28,11 +28,23 @@ public class ExempleConnexionDB {
 
 			cnx.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS user (id_u INTEGER PRIMARY KEY AUTOINCREMENT, nom TEXT NOT NULL, status INTEGER NOT NULL)");
 
-            PreparedStatement pstmt = cnx.prepareStatement("INSERT INTO user VALUES (?,?,?)");
+			//Exemple pour inserer plusieurs utilisateurs
+
+			String[][] utilisateurs = {
+				{"Ofelia", "1"},
+				{"Pin", "1"},
+				{"Miku Hatsune", "1"},
+				{"Super Mario", "1"}
+			};
 			
-			pstmt.setInt(1, 35);
-			pstmt.setString(2, "Ofelia");
-			pstmt.setInt(3, 1);
+			PreparedStatement pstmt = cnx.prepareStatement("INSERT INTO user (nom, status) VALUES (?, ?)");
+			
+			for (String[] user : utilisateurs) {
+				pstmt.setString(1, user[0]);                 // nom
+				pstmt.setInt(2, Integer.parseInt(user[1]));  // status
+				pstmt.executeUpdate();
+			}
+			
 			
 			boolean inserted = pstmt.executeUpdate()==1;
 
@@ -42,10 +54,10 @@ public class ExempleConnexionDB {
             try (Statement stmt = cnx.createStatement(); ResultSet res = stmt.executeQuery(selectSQL)) {
                 System.out.println("Liste des utilisateurs :");
                 while (res.next()) {
-                    int id = res.getInt("id_u");
-                    String nom = res.getString("nom");
-                    int status = res.getInt("status");
-                    System.out.println(id + " | " + nom + " | statut: " + status);
+                    int id_user = res.getInt("id_u");
+                    String nom_user = res.getString("nom");
+                    int status_user = res.getInt("status");
+                    System.out.println(id_user + " | " + nom_user + " | statut: " + status_user);
                 }
             }
 
@@ -53,10 +65,79 @@ public class ExempleConnexionDB {
             System.err.println("Erreur SQLite:");
             e.printStackTrace();
         }
+
+
+		//Exemple de la création et insertion dans la table groupe
+		try (Connection cnx = DriverManager.getConnection(url)) {
+            System.out.println("Connexion réussie à SQLite.");
+
+			cnx.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS groupe (id_g INTEGER PRIMARY KEY AUTOINCREMENT, nom VARCHAR(50) NOT NULL, owner INTEGER NOT NULL, nb_of_members INTEGER CHECK(nb_of_members >= 0), FOREIGN KEY (owner) REFERENCES user(id_u))");
+
+            PreparedStatement pstmt = cnx.prepareStatement("INSERT INTO groupe (nom, owner, nb_of_members) VALUES (?, ?, ?)");
+			
+			pstmt.setString(1, "Amateurs des perroquets");
+			pstmt.setInt(2, 1);
+			pstmt.setInt(3,1);
+			
+			boolean inserted = pstmt.executeUpdate()==1;
+
+
+            // Afficher les groupes
+            String selectSQL = "SELECT * FROM groupe";
+            try (Statement stmt = cnx.createStatement(); ResultSet res = stmt.executeQuery(selectSQL)) {
+                System.out.println("Liste des groupes :");
+                while (res.next()) {
+                    int id_groupe = res.getInt("id_g");
+                    String nom_groupe = res.getString("nom");
+                    String owner = res.getString("owner");
+					int nb_de_membres = res.getInt("nb_of_members");
+                    System.out.println(id_groupe + " | " + nom_groupe + " | owner: " + owner + " | nombre des membres:" + nb_de_membres);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erreur SQLite:");
+            e.printStackTrace();
+        }
+
+
+		//Exemple de la création et insertion dans la table message
+		try (Connection cnx = DriverManager.getConnection(url)) {
+            System.out.println("Connexion réussie à SQLite.");
+
+			cnx.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS message (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_forwarder INTEGER NOT NULL, id_recipient INTEGER NOT NULL, content TEXT, status INTEGER NOT NULL, FOREIGN KEY (id_forwarder) REFERENCES user(id_u), FOREIGN KEY (id_recipient) REFERENCES user(id_u))");
+
+            PreparedStatement pstmt = cnx.prepareStatement("INSERT INTO message (id_forwarder, id_recipient, content, status) VALUES (?, ?, ?, ?)");
+			
+			pstmt.setInt(1, 1);  //de qui
+			pstmt.setInt(2, 2);  //à qui
+			pstmt.setString(3,"Hallo mein Schatz)))");  //message
+			pstmt.setInt(4,2);  //status
+			
+			boolean inserted = pstmt.executeUpdate()==1;
+
+
+            // Afficher les messages
+            String selectSQL = "SELECT * FROM message";
+            try (Statement stmt = cnx.createStatement(); ResultSet res = stmt.executeQuery(selectSQL)) {
+                System.out.println("Liste des messages :");
+                while (res.next()) {
+                    int id_message = res.getInt("id");
+                    String forwarder = res.getString("id_forwarder");
+                    String recipient = res.getString("id_recipient");
+					String content = res.getString("content");
+					int status = res.getInt("status");
+                    System.out.println(id_message + " | de " + forwarder + " | à " + recipient + " | " + content + " | status: " + status);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erreur SQLite:");
+            e.printStackTrace();
+        }
+
+
     }
-
-
-
 
 
 }
