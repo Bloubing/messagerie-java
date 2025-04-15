@@ -105,6 +105,10 @@ public class messagerieClientWindow {
 		JRadioButton supprimer_membre = new JRadioButton("Retirer membre d'un groupe");
 		buttonGroup.add(supprimer_membre);
 		panelOptions.add(supprimer_membre);
+		
+		JRadioButton renommer_groupe = new JRadioButton("Renommer un groupe");
+		buttonGroup.add(renommer_groupe);
+		panelOptions.add(renommer_groupe);
 
 		JButton valider = new JButton("Valider");
 	
@@ -156,6 +160,11 @@ public class messagerieClientWindow {
 					RemoveMemberFrame rmf = new RemoveMemberFrame(c);
 					rmf.setVisible(true);
 					rmf.setDefaultCloseOperation(rmf.DISPOSE_ON_CLOSE);
+				}
+				else if(renommer_groupe.isSelected()) {
+					RenameGroupFrame rgf = new RenameGroupFrame(c);
+					rgf.setVisible(true);
+					rgf.setDefaultCloseOperation(rgf.DISPOSE_ON_CLOSE);
 				}
 			
 			}
