@@ -14,36 +14,49 @@ package fr.uga.miashs.dciss.chatservice.common;
 import java.sql.*;
 
 
+
 public class ExempleConnexionDB {
 
-	public static void main(String[] args) {		
-		
-		try {
-			Connection cnx = DriverManager.getConnection("jdbc:derby:target/sample;create=true");//"jdbc:sqlite:sample.db");//
-			
-			cnx.createStatement().executeUpdate("CREATE TABLE MsgUser (id INT PRIMARY KEY, nickname VARCHAR(20))");
+	public static void main(String[] args) {
+        // Chemin vers la base de données
+        String baseDir = System.getProperty("user.dir"); // Directory courante
+        String dbPath = baseDir + "/src/main/java/fr/uga/miashs/dciss/chatservice/database/database.sqlite";
+        String url = "jdbc:sqlite:" + dbPath;
 
-			PreparedStatement pstmt = cnx.prepareStatement("INSERT INTO MsgUser VALUES (?,?)");
+        try (Connection cnx = DriverManager.getConnection(url)) {
+            System.out.println("Connexion réussie à SQLite.");
+
+			cnx.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS user (id_u INTEGER PRIMARY KEY AUTOINCREMENT, nom TEXT NOT NULL, status INTEGER NOT NULL)");
+
+            PreparedStatement pstmt = cnx.prepareStatement("INSERT INTO user VALUES (?,?,?)");
 			
 			pstmt.setInt(1, 35);
-			pstmt.setString(2, "titi");
+			pstmt.setString(2, "Ofelia");
+			pstmt.setInt(3, 1);
 			
 			boolean inserted = pstmt.executeUpdate()==1;
-			
-			
-			ResultSet res = cnx.createStatement().executeQuery("SELECT * FROM MsgUser");
-			
-			while (res.next()) {
-				System.out.println(res.getInt(1)+" - "+res.getString(2));
-			}
-			
-			
-			
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
-	}
+
+            // Afficher les utilisateurs
+            String selectSQL = "SELECT * FROM user";
+            try (Statement stmt = cnx.createStatement(); ResultSet res = stmt.executeQuery(selectSQL)) {
+                System.out.println("Liste des utilisateurs :");
+                while (res.next()) {
+                    int id = res.getInt("id_u");
+                    String nom = res.getString("nom");
+                    int status = res.getInt("status");
+                    System.out.println(id + " | " + nom + " | statut: " + status);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erreur SQLite:");
+            e.printStackTrace();
+        }
+    }
+
+
+
+
 
 }
