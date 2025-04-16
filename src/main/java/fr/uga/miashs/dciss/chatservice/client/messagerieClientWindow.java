@@ -147,7 +147,7 @@ public class messagerieClientWindow {
 						message_du_serveur.setBackground(new Color(154, 153, 150));
 						c.addMessageListener(
 								p -> message_du_serveur.setText(c.formatageMessage(p)));
-						
+						c.addMessageListener(new MessageListenerImpl());
 						ListeConversationsPanel panel_2 = new ListeConversationsPanel(c);
 						messages.add(panel_2);
 		valider.addActionListener(new ActionListener() {
