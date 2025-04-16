@@ -45,10 +45,10 @@ public class messagerieClientWindow {
 			}
 		});
 	}
-
 	/**
 	 * Create the application.
-	 * @throws Exception 
+	 * 
+	 * @throws Exception
 	 */
 	public messagerieClientWindow() throws Exception {
 		initialize();
@@ -56,7 +56,8 @@ public class messagerieClientWindow {
 
 	/**
 	 * Initialize the contents of the frame.
-	 * @throws Exception 
+	 * 
+	 * @throws Exception
 	 */
 	private void initialize() throws Exception {
 		c = new ClientMsg("localhost", 1666);
@@ -66,7 +67,7 @@ public class messagerieClientWindow {
 				System.exit(0);
 		});
 		c.startSession();
-		
+
 		frame = new JFrame();
 		frame.setBounds(100, 100, 1400, 400);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -75,7 +76,7 @@ public class messagerieClientWindow {
 		JPanel panel = new JPanel();
 		frame.getContentPane().add(panel, BorderLayout.NORTH);
 
-		JLabel titre = new JLabel("Application de Messagerie , ton ID = "+c.getIdentifier());
+		JLabel titre = new JLabel("Application de Messagerie , ton ID = " + c.getIdentifier());
 		panel.add(titre);
 
 		JPanel panelOptions = new JPanel();
@@ -89,29 +90,29 @@ public class messagerieClientWindow {
 		JRadioButton creer_groupe = new JRadioButton("Créer groupe");
 		buttonGroup.add(creer_groupe);
 		panelOptions.add(creer_groupe);
-		
+
 		JRadioButton quitter_groupe = new JRadioButton("Quitter un groupe");
 		buttonGroup.add(quitter_groupe);
 		panelOptions.add(quitter_groupe);
-		
+
 		JRadioButton supprimer_groupe = new JRadioButton("Supprimer un groupe");
 		buttonGroup.add(supprimer_groupe);
 		panelOptions.add(supprimer_groupe);
-		
+
 		JRadioButton ajouter_membre = new JRadioButton("Ajouter un membre à un groupe");
 		buttonGroup.add(ajouter_membre);
 		panelOptions.add(ajouter_membre);
-		
+
 		JRadioButton supprimer_membre = new JRadioButton("Retirer membre d'un groupe");
 		buttonGroup.add(supprimer_membre);
 		panelOptions.add(supprimer_membre);
-		
+
 		JRadioButton renommer_groupe = new JRadioButton("Renommer un groupe");
 		buttonGroup.add(renommer_groupe);
 		panelOptions.add(renommer_groupe);
 
 		JButton valider = new JButton("Valider");
-	
+
 		panelOptions.add(valider);
 
 		JPanel messages = new JPanel();
@@ -123,50 +124,45 @@ public class messagerieClientWindow {
 		message_du_serveur.setEditable(false);
 		message_du_serveur.setBackground(new Color(154, 153, 150));
 		messages.add(message_du_serveur);
-		c.addMessageListener(p -> message_du_serveur.setText(p.srcId + " says to " + p.destId + ": " + new String(p.data)));
+		c.addMessageListener(
+				p -> message_du_serveur.setText(c.formatageMessage(p)));
 
 		JLabel messageServeurTitre = new JLabel("DERNIER MESSAGE : ");
 		messageServeurTitre.setHorizontalAlignment(SwingConstants.CENTER);
 		messages.add(messageServeurTitre, BorderLayout.NORTH);
 		valider.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if ( envoyer_message.isSelected()) {
-					SendingFrame sf = new SendingFrame (c);
+				if (envoyer_message.isSelected()) {
+					SendingFrame sf = new SendingFrame(c);
 					sf.setVisible(true);
 					sf.setDefaultCloseOperation(sf.DISPOSE_ON_CLOSE);
-				}
-				else if(creer_groupe.isSelected()) {
+				} else if (creer_groupe.isSelected()) {
 					CreateGroupFrame cpf = new CreateGroupFrame(c);
 					cpf.setVisible(true);
 					cpf.setDefaultCloseOperation(cpf.DISPOSE_ON_CLOSE);
 
-				}
-				else if(quitter_groupe.isSelected()) {
+				} else if (quitter_groupe.isSelected()) {
 					LeaveGroupFrame lgf = new LeaveGroupFrame(c);
 					lgf.setVisible(true);
 					lgf.setDefaultCloseOperation(lgf.DISPOSE_ON_CLOSE);
-				}
-				else if(supprimer_groupe.isSelected()) {
+				} else if (supprimer_groupe.isSelected()) {
 					DeleteGroupFrame dgf = new DeleteGroupFrame(c);
 					dgf.setVisible(true);
 					dgf.setDefaultCloseOperation(dgf.DISPOSE_ON_CLOSE);
-				}
-				else if(ajouter_membre.isSelected()) {
+				} else if (ajouter_membre.isSelected()) {
 					AddMemberFrame amf = new AddMemberFrame(c);
 					amf.setVisible(true);
 					amf.setDefaultCloseOperation(amf.DISPOSE_ON_CLOSE);
-				}
-				else if(supprimer_membre.isSelected()) {
+				} else if (supprimer_membre.isSelected()) {
 					RemoveMemberFrame rmf = new RemoveMemberFrame(c);
 					rmf.setVisible(true);
 					rmf.setDefaultCloseOperation(rmf.DISPOSE_ON_CLOSE);
-				}
-				else if(renommer_groupe.isSelected()) {
+				} else if (renommer_groupe.isSelected()) {
 					RenameGroupFrame rgf = new RenameGroupFrame(c);
 					rgf.setVisible(true);
 					rgf.setDefaultCloseOperation(rgf.DISPOSE_ON_CLOSE);
 				}
-			
+
 			}
 		});
 	}
