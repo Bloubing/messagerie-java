@@ -232,6 +232,8 @@ public class ClientMsg {
 		dos.write(fileBytes); // données du fichier
 
 		dos.flush();
+		db.ajouterMessage( "vous avez envoyé "+fileName, getIdentifier(), destId);
+		db.ajouterConversation(getIdentifier(), destId);
 		sendPacket(destId, bos.toByteArray());
 	}
 
