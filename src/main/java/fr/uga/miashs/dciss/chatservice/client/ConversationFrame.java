@@ -86,15 +86,19 @@ public class ConversationFrame extends JFrame {
 		}
 		public void rafraichir() {
 			listeMessages.removeAll();
-			TreeSet<Integer> messages = new TreeSet<Integer>();
-			messages.add(1);
-			messages.add(3);
-			messages.add(2);
-			for ( Integer message : messages) {
-				JLabel messageCourant = new JLabel(message+" Coucou");
-				if ( message % 2 == 0) messageCourant.setHorizontalAlignment(SwingConstants.RIGHT);
+			TreeSet<Message> messages = c.getDb().messages_tous(a);
+			for ( Message message : messages) {
+				String a_mettre;
+				if( message.getSrcId() == c.getIdentifier()) {
+					a_mettre = "Vous avez dis : "+message.getMessage();
+				}
 				else {
-					messageCourant.setHorizontalAlignment(SwingConstants.LEFT);
+					a_mettre = message.getSrcId() +" : "+message.getMessage();
+				}
+				JLabel messageCourant = new JLabel(a_mettre);
+				if ( message.getSrcId()== c.getIdentifier()) messageCourant.setHorizontalAlignment(SwingConstants.LEFT);
+				else {
+					messageCourant.setHorizontalAlignment(SwingConstants.RIGHT);
 				}
 				listeMessages.add(messageCourant);
 
