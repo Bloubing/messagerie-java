@@ -133,7 +133,7 @@ public class ClientMsg {
 				System.out.println(messageCheckExtension.endsWith(".txt"));
 			
 				String textePourBdd = "vous a envoyé le fichier "+nomFichier;
-				getDb().ajouterMessage(nomFichier, p.srcId, getIdentifier());
+				getDb().ajouterMessage(textePourBdd, p.srcId, getIdentifier());
 				getDb().ajouterConversation(getIdentifier(), p.srcId);
 
 				if (messageCheckExtension.endsWith(".txt")) {
