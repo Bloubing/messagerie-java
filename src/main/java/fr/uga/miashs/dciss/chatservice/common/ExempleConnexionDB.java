@@ -26,7 +26,7 @@ public class ExempleConnexionDB {
         try (Connection cnx = DriverManager.getConnection(url)) {
             System.out.println("Connexion réussie à SQLite.");
 
-			cnx.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS user (id_u INTEGER PRIMARY KEY AUTOINCREMENT, nom TEXT NOT NULL, status INTEGER NOT NULL)");
+			cnx.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS user (id_u INTEGER PRIMARY KEY AUTOINCREMENT, nom TEXT, status INTEGER NOT NULL)");
 
 			//Exemple pour inserer plusieurs utilisateurs
 
