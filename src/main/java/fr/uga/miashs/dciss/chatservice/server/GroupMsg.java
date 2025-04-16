@@ -17,10 +17,10 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import fr.uga.miashs.dciss.chatservice.common.Packet;
 
 public class GroupMsg implements PacketProcessor {
-
 	private int groupId;
 	private UserMsg owner;
 	private Set<UserMsg> members;
+	private String name;
 	
 	public GroupMsg(int groupId, UserMsg owner) {
 		if (groupId>-1) throw new IllegalArgumentException("id must not be less than 0");
@@ -29,8 +29,17 @@ public class GroupMsg implements PacketProcessor {
 		this.owner=owner;
 		members=Collections.synchronizedSet(new HashSet<>());
 		addMember(owner);
+		this.name = "";
 	}
 	
+	public String getName() {
+		return this.name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public int getId() {
 		return groupId;
 	}
