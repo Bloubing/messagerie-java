@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import fr.uga.miashs.dciss.chatservice.common.Packet;
+import fr.uga.miashs.dciss.chatservice.common.BaseDeDonnees_client;
 
 /**
  * Manages the connection to a ServerMsg. Method startSession() is used to
@@ -32,7 +33,7 @@ public class ClientMsg {
 
 	private String serverAddress;
 	private int serverPort;
-
+	private BaseDeDonnees_client db;
 	private Socket s;
 	private DataOutputStream dos;
 	private DataInputStream dis;
@@ -60,6 +61,10 @@ public class ClientMsg {
 		identifier = id;
 		mListeners = new ArrayList<>();
 		cListeners = new ArrayList<>();
+	}
+	
+	public BaseDeDonnees_client getDb() {
+		return this.db;
 	}
 
 	/**
@@ -105,7 +110,11 @@ public class ClientMsg {
 		}
 		else {
 			message.append("Message reçu de "+p.srcId+" : ");
-			message.append(new String(p.data));
+			String text = new String(p.data);
+			getDb().ajouterMessage(text, p.srcId, getIdentifier());
+			getDb().ajouterConversation(getIdentifier(), p.srcId);
+
+			message.append(text);
 			
 		}
 		return message.toString();
@@ -152,6 +161,8 @@ public class ClientMsg {
 					identifier = dis.readInt();
 				}
 				// start the receive loop
+				System.out.println("mon id est le  :"+this.getIdentifier());
+				this.db = new BaseDeDonnees_client(identifier);
 				new Thread(() -> receiveLoop()).start();
 				notifyConnectionListeners(true);
 			} catch (IOException e) {

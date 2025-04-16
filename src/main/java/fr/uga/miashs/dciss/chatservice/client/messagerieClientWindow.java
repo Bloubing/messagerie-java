@@ -22,6 +22,8 @@ import javax.swing.SwingConstants;
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class messagerieClientWindow {
 
@@ -69,6 +71,13 @@ public class messagerieClientWindow {
 		c.startSession();
 
 		frame = new JFrame();
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				System.out.println("Je ferme");
+				c.getDb().fermerConnexion();
+			}
+		});
 		frame.setBounds(100, 100, 1400, 400);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
@@ -173,5 +182,6 @@ public class messagerieClientWindow {
 			}
 		});
 	}
+	
 
 }

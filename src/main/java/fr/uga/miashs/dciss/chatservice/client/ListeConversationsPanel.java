@@ -40,11 +40,8 @@ public class ListeConversationsPanel extends JPanel {
 		liste.setLayout(new GridLayout(0, 1, 0, 0));
 		
 		JLabel abe = new JLabel("Vos conversations :");
-		ArrayList<Integer> ab = new ArrayList<Integer>();
-		ab.add(1);
-		ab.add(2);
-		ab.add(3);
-		for ( Integer i : ab) {
+		ArrayList<Integer> conversations = c.getDb().conversations();
+		for ( Integer i : conversations) {
 			JPanel panelCourant = new JPanel();
 			panelCourant.setLayout(new GridLayout(1,0,0,0));
 			JLabel lblCourant = new JLabel("Conversation avec : "+i);
@@ -70,10 +67,9 @@ public class ListeConversationsPanel extends JPanel {
 	}
 	public void rafraichir() {
 		liste.removeAll();
-		ArrayList<Integer> test = new ArrayList<Integer>();
-		test.add(1);
-		test.add(2);
-		for ( Integer i : test) {
+		ArrayList<Integer> conversations = c.getDb().conversations();
+		
+		for ( Integer i : conversations) {
 			JPanel panelCourant = new JPanel();
 			panelCourant.setLayout(new GridLayout(1,0,0,0));
 			JLabel lblCourant = new JLabel("Conversation avec : "+i);

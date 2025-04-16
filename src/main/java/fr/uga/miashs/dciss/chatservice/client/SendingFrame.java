@@ -77,7 +77,8 @@ public class SendingFrame extends JFrame {
 					// si l'id et le message sont remplis on envoi
 					int dest = Integer.parseInt(id.getText());
 					c.sendPacket(dest, message.getText().getBytes());
-					
+					c.getDb().ajouterMessage(message.getText(), c.getIdentifier(), dest);
+					c.getDb().ajouterConversation(c.getIdentifier(), dest);
 					JOptionPane.showMessageDialog(null, "Message envoyé");
 					fermer();
 				}

@@ -10,11 +10,14 @@ public class BaseDeDonnees_client {
     private int user_id;
 
 
-    public TreeSet<Message> messages_tous(int user_id) {
+    public TreeSet<Message> messages_tous(int other_id) {
         TreeSet<Message> messages = new TreeSet<>();
         String nomTable = "message_client_" + this.user_id; 
-    
-        String query = "SELECT * FROM " + nomTable;
+        String where =  " WHERE ( id_forwarder="+this.user_id +" AND id_recipient="+other_id+" )" 
+				+ "OR (id_forwarder ="+other_id+" AND id_recipient="+this.user_id+") ";
+        String query = "SELECT * FROM " + nomTable +
+        		where;
+        		
         try (PreparedStatement pstmt = connexion.prepareStatement(query)) {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -193,8 +196,8 @@ public class BaseDeDonnees_client {
         String nomTableConversations = "conversation_client_" + this.user_id;
     
         try (Statement stmt = connexion.createStatement()) {
-            stmt.executeUpdate("DELETE FROM " + nomTableMessages);
-            stmt.executeUpdate("DELETE FROM " + nomTableConversations);
+            stmt.executeUpdate("DROP TABLE " + nomTableMessages);
+            stmt.executeUpdate("DROP TABLE " + nomTableConversations);
         } catch (SQLException e) {
             e.printStackTrace();
         }

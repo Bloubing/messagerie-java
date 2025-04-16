@@ -13,7 +13,7 @@ import javax.swing.SwingConstants;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-//import fr.uga.miashs.dciss.chatservice.common.Message;
+import fr.uga.miashs.dciss.chatservice.common.Message;
 
 
 public class ConversationFrame extends JFrame {
@@ -65,14 +65,19 @@ public class ConversationFrame extends JFrame {
 		JLabel titre = new JLabel("Votre conversation avec "+a);
 		titre.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(titre, BorderLayout.NORTH);
-		TreeSet<Integer> messages = new TreeSet<Integer>();
-		messages.add(1);
-		messages.add(2);
-		for ( Integer message : messages) {
-			JLabel messageCourant = new JLabel(message+" Coucou");
-			if ( message % 2 == 0) messageCourant.setHorizontalAlignment(SwingConstants.RIGHT);
+		TreeSet<Message> messages = c.getDb().messages_tous(a);
+		for ( Message message : messages) {
+			String a_mettre;
+			if( message.getSrcId() == c.getIdentifier()) {
+				a_mettre = "Vous avez dis : "+message.getMessage();
+			}
 			else {
-				messageCourant.setHorizontalAlignment(SwingConstants.LEFT);
+				a_mettre = message.getSrcId() +" : "+message.getMessage();
+			}
+			JLabel messageCourant = new JLabel(a_mettre);
+			if ( message.getSrcId()== c.getIdentifier()) messageCourant.setHorizontalAlignment(SwingConstants.LEFT);
+			else {
+				messageCourant.setHorizontalAlignment(SwingConstants.RIGHT);
 			}
 			listeMessages.add(messageCourant);
 

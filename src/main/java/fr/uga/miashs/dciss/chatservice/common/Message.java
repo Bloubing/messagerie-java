@@ -1,3 +1,4 @@
+package fr.uga.miashs.dciss.chatservice.common;
 public class Message implements Comparable<Message> {
 	private int id;
 	private int srcId;
