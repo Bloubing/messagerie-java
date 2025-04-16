@@ -124,6 +124,7 @@ public class ClientMsg {
 	public void addConnectionListener(ConnectionListener l) {
 		if (l != null)
 			cListeners.add(l);
+		
 	}
 
 	protected void notifyConnectionListeners(boolean active) {
@@ -163,18 +164,19 @@ public class ClientMsg {
 	}
 
 	//si il y a un fichier attaché  un message
-	public void sendFile(int destId, File file) throws IOException {
+	public void sendFile(int destId,String filePath) throws IOException {
+		
+		File file = new File(filePath);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
 
-		dos.writeByte(10); // Type d’action : transfert de fichier
-
-		byte[] nameBytes = file.getName().getBytes("UTF-8");
-		dos.writeInt(nameBytes.length); // longueur du nom
+		dos.write(10); // Type d’action : transfert de fichier
+		String fileName = file.getName();
+		byte[] nameBytes = fileName.getBytes();
+		dos.write(nameBytes.length); // longueur du nom
 		dos.write(nameBytes); // nom du fichier
 
 		byte[] fileBytes = Files.readAllBytes(file.toPath());
-		dos.writeInt(fileBytes.length); // longueur du contenu
 		dos.write(fileBytes); // données du fichier
 
 		dos.flush();
@@ -312,12 +314,10 @@ public class ClientMsg {
 					System.out.println("Chemin vers le fichier : ");
 					String path = sc.nextLine();
 					
-					File f = new File(path);
-					if (f.exists()) {
-					c.sendFile(dest, f);
-					} else {
-					System.out.println("Fichier introuvable.");
-					}
+					
+					
+					c.sendFile(dest, path);
+					
 				}
 			} catch (InputMismatchException | NumberFormatException e) {
 				System.out.println("Mauvais format");

@@ -110,6 +110,10 @@ public class messagerieClientWindow {
 		JRadioButton renommer_groupe = new JRadioButton("Renommer un groupe");
 		buttonGroup.add(renommer_groupe);
 		panelOptions.add(renommer_groupe);
+		
+		JRadioButton transfert_fichier = new JRadioButton("Transférer un fichier");
+		buttonGroup.add(transfert_fichier);
+		panelOptions.add(transfert_fichier);
 
 		JButton valider = new JButton("Valider");
 
@@ -126,7 +130,7 @@ public class messagerieClientWindow {
 		messages.add(message_du_serveur);
 		c.addMessageListener(
 				p -> message_du_serveur.setText(c.formatageMessage(p)));
-
+		c.addMessageListener(new MessageListenerImpl());
 		JLabel messageServeurTitre = new JLabel("DERNIER MESSAGE : ");
 		messageServeurTitre.setHorizontalAlignment(SwingConstants.CENTER);
 		messages.add(messageServeurTitre, BorderLayout.NORTH);
@@ -161,6 +165,10 @@ public class messagerieClientWindow {
 					RenameGroupFrame rgf = new RenameGroupFrame(c);
 					rgf.setVisible(true);
 					rgf.setDefaultCloseOperation(rgf.DISPOSE_ON_CLOSE);
+				} else if (transfert_fichier.isSelected()) {
+					TransfertFichierFrame tf = new TransfertFichierFrame(c);
+					tf.setVisible(true);
+					tf.setDefaultCloseOperation(tf.DISPOSE_ON_CLOSE);
 				}
 
 			}
