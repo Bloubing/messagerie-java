@@ -14,13 +14,14 @@ import java.awt.event.ActionEvent;
 public class ListeConversationsPanel extends JPanel {
 	JPanel liste;
 	JScrollPane scrollPane;
-
+	ClientMsg c;
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Create the panel.
 	 */
 	public ListeConversationsPanel(ClientMsg c) {
+		this.c = c;
 		setLayout(new BorderLayout(0, 0));
 		
 		JLabel lblNewLabel = new JLabel("Vos conversations :");
@@ -52,7 +53,9 @@ public class ListeConversationsPanel extends JPanel {
 			panelCourant.add(voir);
 			voir.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					System.out.println("On appuie sur conv de "+i);
+					ConversationFrame conv = new ConversationFrame(c, i);
+					conv.setVisible(true);
+					conv.setDefaultCloseOperation(conv.DISPOSE_ON_CLOSE);
 				}
 			});
 			liste.add(panelCourant);			
@@ -79,11 +82,15 @@ public class ListeConversationsPanel extends JPanel {
 			panelCourant.add(voir);
 			voir.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					System.out.println("On appuie sur conv de "+i);
+					ConversationFrame conv = new ConversationFrame(c, i);
+					conv.setVisible(true);
+					conv.setDefaultCloseOperation(conv.DISPOSE_ON_CLOSE);
+
 				}
 			});
 			liste.add(panelCourant);
 			this.revalidate();
+			
 		}
 	}
 
