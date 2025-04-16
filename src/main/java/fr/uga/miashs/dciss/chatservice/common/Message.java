@@ -21,7 +21,7 @@ public class Message implements Comparable<Message> {
 	@Override
 	public int compareTo(Message o) {
 		// TODO Auto-generated method stub
-		return ((Message) o).getId() - this.getId();
+		return  this.getId() - ((Message) o).getId() ;
 	}
 
 	public int getId() {

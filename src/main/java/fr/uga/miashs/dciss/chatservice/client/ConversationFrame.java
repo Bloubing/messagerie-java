@@ -20,6 +20,8 @@ public class ConversationFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
+	private ClientMsg c;
+	private int interlocuteur;
 	private JPanel listeMessages;
 
 	/**
@@ -41,7 +43,9 @@ public class ConversationFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public ConversationFrame(ClientMsg c, int a) {
+	public ConversationFrame(ClientMsg c, int interlocuteur) {
+		this.c = c;
+		this.interlocuteur = interlocuteur;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 500, 800);
 		contentPane = new JPanel();
@@ -62,14 +66,14 @@ public class ConversationFrame extends JFrame {
 		contentPane.add(listeMessages, BorderLayout.CENTER);
 		listeMessages.setLayout(new GridLayout(0, 1, 0, 0));
 		
-		JLabel titre = new JLabel("Votre conversation avec "+a);
+		JLabel titre = new JLabel("Votre conversation avec "+interlocuteur);
 		titre.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(titre, BorderLayout.NORTH);
-		TreeSet<Message> messages = c.getDb().messages_tous(a);
+		TreeSet<Message> messages = c.getDb().messages_tous(interlocuteur);
 		for ( Message message : messages) {
 			String a_mettre;
 			if( message.getSrcId() == c.getIdentifier()) {
-				a_mettre = "Vous avez dis : "+message.getMessage();
+				a_mettre = "Vous avez dit : "+message.getMessage();
 			}
 			else {
 				a_mettre = message.getSrcId() +" : "+message.getMessage();
@@ -86,11 +90,11 @@ public class ConversationFrame extends JFrame {
 		}
 		public void rafraichir() {
 			listeMessages.removeAll();
-			TreeSet<Message> messages = c.getDb().messages_tous(a);
+			TreeSet<Message> messages = c.getDb().messages_tous(interlocuteur);
 			for ( Message message : messages) {
 				String a_mettre;
 				if( message.getSrcId() == c.getIdentifier()) {
-					a_mettre = "Vous avez dis : "+message.getMessage();
+					a_mettre = "Vous avez dit : "+message.getMessage();
 				}
 				else {
 					a_mettre = message.getSrcId() +" : "+message.getMessage();
