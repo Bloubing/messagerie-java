@@ -15,6 +15,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -104,8 +105,46 @@ public class ClientMsg {
 
 		}
 		else {
-			message.append("Message reçu de "+p.srcId+" : ");
-			message.append(new String(p.data));
+			ByteBuffer data = ByteBuffer.wrap(p.data);
+			int type = data.getInt();
+
+			if (type != 10) {
+				message.append("Message reçu de " + p.srcId + " : ");
+				message.append(new String(p.data));
+			
+			} else { // c'est un fichier
+				message.append("Fichier reçu de " + p.srcId + " : ");
+				//On lit le nom du fichier
+				byte longueurNomFichier = data.get();
+				byte[] nameBytes = new byte[longueurNomFichier];
+				data.get(nameBytes);
+				String nomFichier = new String(nameBytes, StandardCharsets.UTF_8);
+				String messageCheckExtension = nomFichier.toString();
+				System.out.println(messageCheckExtension);
+				System.out.println(messageCheckExtension.endsWith(".txt"));
+
+				message.append(nomFichier);
+
+				if (messageCheckExtension.endsWith(".txt")) {
+					message.append("\nContenu du fichier texte :\n");
+					byte[] dataFichier = new byte[data.remaining()];
+					int i  = 0;
+					while (data.hasRemaining()) {
+						dataFichier[i] = data.get();
+						i += 1;
+					}
+					
+					message.append(new String(dataFichier));
+				} else {
+
+					message.append(". Vérifiez votre répertoire.");
+				}
+				
+			}
+			
+			
+
+			
 			
 		}
 		return message.toString();
@@ -170,7 +209,7 @@ public class ClientMsg {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
 
-		dos.write(10); // Type d’action : transfert de fichier
+		dos.writeInt(10); // Type d’action : transfert de fichier
 		String fileName = file.getName();
 		byte[] nameBytes = fileName.getBytes();
 		dos.write(nameBytes.length); // longueur du nom

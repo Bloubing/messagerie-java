@@ -23,14 +23,14 @@ public void messageReceived(Packet p) {
             return;
         }
 
-    	byte type = p.data[0];
-    	ByteBuffer buf = ByteBuffer.wrap(p.data);
     	
+    	ByteBuffer buf = ByteBuffer.wrap(p.data);
+    	int type = buf.getInt();
     	System.out.println("Type détecté =" + type);
         if (type == 10) { // Transfert de fichier
         	System.out.println("mon type est 10");
             try {
-            	buf.get(); // On passe le type pcq on l'a déjà vérifié
+            	
                 byte nameLen = buf.get();
                 byte[] nameBytes = new byte[nameLen];
                 buf.get(nameBytes);
@@ -49,10 +49,6 @@ public void messageReceived(Packet p) {
             } catch (IOException | IndexOutOfBoundsException e) {
                 System.err.println("Erreur lors de la réception du fichier : " + e.getMessage());
             }
-        } else {
-            // Message texte
-            String msg = new String(p.data);
-            System.out.println("Message reçu de " + p.srcId + " : " + msg);
         }
     }
 }
