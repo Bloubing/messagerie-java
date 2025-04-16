@@ -15,6 +15,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import fr.uga.miashs.dciss.chatservice.common.Packet;
@@ -82,12 +83,41 @@ public class ClientMsg {
 		if (l != null)
 			mListeners.add(l);
 	}
+	public String formatageMessage(Packet p) {
+		StringBuffer message = new StringBuffer("");
+		if (p.destId < 0) {
+			message.append("Message reçu de "+p.srcId+" dans le groupe ");
+			System.out.println(message);
+			ByteBuffer data = ByteBuffer.wrap(p.data);
+			byte  longueurNom = data.get();
+			for (int i = 0; i<longueurNom; i++) {
+				message.append(data.getChar());
+			}
+			byte[] dataMessage = new byte[data.remaining()];
+			int i  = 0;
+			while(data.hasRemaining()) {
+				dataMessage[i] = data.get();
+				i +=1;
+			}
+			message.append(" : ");
+			message.append(new String(dataMessage));
+
+		}
+		else {
+			message.append("Message reçu de "+p.srcId+" : ");
+			message.append(new String(p.data));
+			
+		}
+		return message.toString();
+	}
+
 	protected void notifyMessageListeners(Packet p) {
 		mListeners.forEach(x -> x.messageReceived(p));
 	}
-	
+
 	/**
-	 * Register a ConnectionListener to the client. It will be notified if the connection  start or ends.
+	 * Register a ConnectionListener to the client. It will be notified if the
+	 * connection start or ends.
 	 * 
 	 * @param l
 	 */
@@ -95,10 +125,10 @@ public class ClientMsg {
 		if (l != null)
 			cListeners.add(l);
 	}
+
 	protected void notifyConnectionListeners(boolean active) {
 		cListeners.forEach(x -> x.connectionEvent(active));
 	}
-
 
 	public int getIdentifier() {
 		return identifier;
@@ -132,6 +162,26 @@ public class ClientMsg {
 		}
 	}
 
+	//si il y a un fichier attaché  un message
+	public void sendFile(int destId, File file) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+
+		dos.writeByte(10); // Type d’action : transfert de fichier
+
+		byte[] nameBytes = file.getName().getBytes("UTF-8");
+		dos.writeInt(nameBytes.length); // longueur du nom
+		dos.write(nameBytes); // nom du fichier
+
+		byte[] fileBytes = Files.readAllBytes(file.toPath());
+		dos.writeInt(fileBytes.length); // longueur du contenu
+		dos.write(fileBytes); // données du fichier
+
+		dos.flush();
+		sendPacket(destId, bos.toByteArray());
+	}
+
+
 	/**
 	 * Send a packet to the specified destination (etiher a userId or groupId)
 	 * 
@@ -150,7 +200,7 @@ public class ClientMsg {
 			// error, connection closed
 			closeSession();
 		}
-		
+
 	}
 
 	/**
@@ -189,9 +239,14 @@ public class ClientMsg {
 
 		// add a dummy listener that print the content of message as a string
 		c.addMessageListener(p -> System.out.println(p.srcId + " says to " + p.destId + ": " + new String(p.data)));
-		
+		// listener pour la version fichier
+		c.addMessageListener(new MessageListenerImpl());
+
 		// add a connection listener that exit application when connection closed
-		c.addConnectionListener(active ->  {if (!active) System.exit(0);});
+		c.addConnectionListener(active -> {
+			if (!active)
+				System.exit(0);
+		});
 
 		c.startSession();
 		System.out.println("Vous êtes : " + c.getIdentifier());
@@ -234,22 +289,35 @@ public class ClientMsg {
 					ArrayList<Integer> membres= new ArrayList<Integer>();
 					System.out.println("Ajouter id membre : (-1) pour stopper");
 					int membre = Integer.parseInt(sc.nextLine());
-					while( membre != -1) {
+					while (membre != -1) {
 						membres.add(membre);
 						System.out.println("Ajouter id membre : (-1) pour stopper");
 						membre = Integer.parseInt(sc.nextLine());
 					}
-					ByteBuffer data = ByteBuffer.allocate(8+(membres.size()*4));
+					ByteBuffer data = ByteBuffer.allocate(8 + (membres.size() * 4));
 					data.putInt(type);
 					data.putInt(membres.size());
-					for ( Integer idMembre : membres) {
+					for (Integer idMembre : membres) {
 						data.putInt(idMembre);
 					}
-					for ( byte b : data.array()) {
+					for (byte b : data.array()) {
 						System.out.println(b);
 					}
 					c.sendPacket(0, data.array());
+
+				}
+				else if (type == 10) {
+					System.out.println("À quel utilisateur voulez-vous envoyer un fichier ?");
+					int dest = Integer.parseInt(sc.nextLine());
+					System.out.println("Chemin vers le fichier : ");
+					String path = sc.nextLine();
 					
+					File f = new File(path);
+					if (f.exists()) {
+					c.sendFile(dest, f);
+					} else {
+					System.out.println("Fichier introuvable.");
+					}
 				}
 			} catch (InputMismatchException | NumberFormatException e) {
 				System.out.println("Mauvais format");

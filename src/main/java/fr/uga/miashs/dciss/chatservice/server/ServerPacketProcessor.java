@@ -103,7 +103,6 @@ public class ServerPacketProcessor implements PacketProcessor {
 		if (group != null) {
 			group.removeMember(user);
 			LOG.info("User: " + userId + "a quitté le groupe " + group.getName());
-
 		}
 	}
 
@@ -171,9 +170,7 @@ public class ServerPacketProcessor implements PacketProcessor {
 		if (group != null && group.getOwner().getId() == ownerId) {
 			group.removeMember(memberToRemove);
 			LOG.info("User: " + memberToRemoveId + "a été retiré du groupe " + group.getName() + " par " + ownerId);
-
 		}
-
 	}
 	
 	// type 6
@@ -199,10 +196,7 @@ public class ServerPacketProcessor implements PacketProcessor {
 		}
 	}
 
-
-
 }
-
 
 
 
