@@ -82,12 +82,41 @@ public class ClientMsg {
 		if (l != null)
 			mListeners.add(l);
 	}
+	public String formatageMessage(Packet p) {
+		StringBuffer message = new StringBuffer("");
+		if (p.destId < 0) {
+			message.append("Message reçu de "+p.srcId+" dans le groupe ");
+			System.out.println(message);
+			ByteBuffer data = ByteBuffer.wrap(p.data);
+			byte  longueurNom = data.get();
+			for (int i = 0; i<longueurNom; i++) {
+				message.append(data.getChar());
+			}
+			byte[] dataMessage = new byte[data.remaining()];
+			int i  = 0;
+			while(data.hasRemaining()) {
+				dataMessage[i] = data.get();
+				i +=1;
+			}
+			message.append(" : ");
+			message.append(new String(dataMessage));
+
+		}
+		else {
+			message.append("Message reçu de "+p.srcId+" : ");
+			message.append(new String(p.data));
+			
+		}
+		return message.toString();
+	}
+
 	protected void notifyMessageListeners(Packet p) {
 		mListeners.forEach(x -> x.messageReceived(p));
 	}
-	
+
 	/**
-	 * Register a ConnectionListener to the client. It will be notified if the connection  start or ends.
+	 * Register a ConnectionListener to the client. It will be notified if the
+	 * connection start or ends.
 	 * 
 	 * @param l
 	 */
@@ -95,10 +124,10 @@ public class ClientMsg {
 		if (l != null)
 			cListeners.add(l);
 	}
+
 	protected void notifyConnectionListeners(boolean active) {
 		cListeners.forEach(x -> x.connectionEvent(active));
 	}
-
 
 	public int getIdentifier() {
 		return identifier;
@@ -150,7 +179,7 @@ public class ClientMsg {
 			// error, connection closed
 			closeSession();
 		}
-		
+
 	}
 
 	/**
@@ -189,9 +218,12 @@ public class ClientMsg {
 
 		// add a dummy listener that print the content of message as a string
 		c.addMessageListener(p -> System.out.println(p.srcId + " says to " + p.destId + ": " + new String(p.data)));
-		
+
 		// add a connection listener that exit application when connection closed
-		c.addConnectionListener(active ->  {if (!active) System.exit(0);});
+		c.addConnectionListener(active -> {
+			if (!active)
+				System.exit(0);
+		});
 
 		c.startSession();
 		System.out.println("Vous êtes : " + c.getIdentifier());
@@ -216,42 +248,40 @@ public class ClientMsg {
 			c.sendPacket(0, bos.toByteArray());
 
 		}
-		
-		
 
 		Scanner sc = new Scanner(System.in);
 		String lu = null;
 		while (!"\\quit".equals(lu)) {
 			try {
-				System.out.println("Que voulez vous faire ? 0 : écrire, 1 créer un groupe, 2 quitter un groupe, 3 suprimer un groupe, 4 ajouter un membre, 5 retirer un membre");
-				int type = Integer.parseInt(sc.nextLine());				
-				if ( type == 0) { //message classique
-				System.out.println("à qui voulez-vous écrire");
-				int dest = Integer.parseInt(sc.nextLine());
-				System.out.println("Votre message ? ");
-				lu = sc.nextLine();
-				c.sendPacket(dest, lu.getBytes());
-				}
-				else if( type == 1) {
-					ArrayList<Integer> membres= new ArrayList<Integer>();
+				System.out.println(
+						"Que voulez vous faire ? 0 : écrire, 1 créer un groupe, 2 quitter un groupe, 3 suprimer un groupe, 4 ajouter un membre, 5 retirer un membre");
+				int type = Integer.parseInt(sc.nextLine());
+				if (type == 0) { // message classique
+					System.out.println("à qui voulez-vous écrire");
+					int dest = Integer.parseInt(sc.nextLine());
+					System.out.println("Votre message ? ");
+					lu = sc.nextLine();
+					c.sendPacket(dest, lu.getBytes());
+				} else if (type == 1) {
+					ArrayList<Integer> membres = new ArrayList<Integer>();
 					System.out.println("Ajouter id membre : (-1) pour stopper");
 					int membre = Integer.parseInt(sc.nextLine());
-					while( membre != -1) {
+					while (membre != -1) {
 						membres.add(membre);
 						System.out.println("Ajouter id membre : (-1) pour stopper");
 						membre = Integer.parseInt(sc.nextLine());
 					}
-					ByteBuffer data = ByteBuffer.allocate(8+(membres.size()*4));
+					ByteBuffer data = ByteBuffer.allocate(8 + (membres.size() * 4));
 					data.putInt(type);
 					data.putInt(membres.size());
-					for ( Integer idMembre : membres) {
+					for (Integer idMembre : membres) {
 						data.putInt(idMembre);
 					}
-					for ( byte b : data.array()) {
+					for (byte b : data.array()) {
 						System.out.println(b);
 					}
 					c.sendPacket(0, data.array());
-					
+
 				}
 			} catch (InputMismatchException | NumberFormatException e) {
 				System.out.println("Mauvais format");

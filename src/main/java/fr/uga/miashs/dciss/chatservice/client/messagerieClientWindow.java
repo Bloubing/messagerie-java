@@ -45,7 +45,6 @@ public class messagerieClientWindow {
 			}
 		});
 	}
-
 	/**
 	 * Create the application.
 	 * 
@@ -126,8 +125,7 @@ public class messagerieClientWindow {
 		message_du_serveur.setBackground(new Color(154, 153, 150));
 		messages.add(message_du_serveur);
 		c.addMessageListener(
-				p -> message_du_serveur.setText(p.srcId + "says to you"+ ": " + new String(p.data))
-				);
+				p -> message_du_serveur.setText(c.formatageMessage(p)));
 
 		JLabel messageServeurTitre = new JLabel("DERNIER MESSAGE : ");
 		messageServeurTitre.setHorizontalAlignment(SwingConstants.CENTER);
