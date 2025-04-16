@@ -131,8 +131,10 @@ public class ClientMsg {
 				String messageCheckExtension = nomFichier.toString();
 				System.out.println(messageCheckExtension);
 				System.out.println(messageCheckExtension.endsWith(".txt"));
-
-				message.append(nomFichier);
+			
+				String textePourBdd = "vous a envoyé le fichier "+nomFichier;
+				getDb().ajouterMessage(nomFichier, p.srcId, getIdentifier());
+				getDb().ajouterConversation(getIdentifier(), p.srcId);
 
 				if (messageCheckExtension.endsWith(".txt")) {
 					message.append("\nContenu du fichier texte :\n");
