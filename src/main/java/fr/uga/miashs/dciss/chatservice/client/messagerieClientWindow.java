@@ -117,19 +117,26 @@ public class messagerieClientWindow {
 
 		JPanel messages = new JPanel();
 		frame.getContentPane().add(messages, BorderLayout.CENTER);
-		messages.setLayout(new BorderLayout(0, 0));
-
-		message_du_serveur = new JTextArea();
-		message_du_serveur.setFont(new Font("Dialog", Font.PLAIN, 25));
-		message_du_serveur.setEditable(false);
-		message_du_serveur.setBackground(new Color(154, 153, 150));
-		messages.add(message_du_serveur);
-		c.addMessageListener(
-				p -> message_du_serveur.setText(c.formatageMessage(p)));
-
-		JLabel messageServeurTitre = new JLabel("DERNIER MESSAGE : ");
-		messageServeurTitre.setHorizontalAlignment(SwingConstants.CENTER);
-		messages.add(messageServeurTitre, BorderLayout.NORTH);
+		messages.setLayout(new GridLayout(0, 1, 0, 0));
+		
+		JPanel panel_1 = new JPanel();
+		messages.add(panel_1);
+				panel_1.setLayout(new BorderLayout(0, 0));
+		
+				JLabel messageServeurTitre = new JLabel("DERNIER MESSAGE : ");
+				panel_1.add(messageServeurTitre, BorderLayout.NORTH);
+				messageServeurTitre.setHorizontalAlignment(SwingConstants.CENTER);
+				
+						message_du_serveur = new JTextArea();
+						panel_1.add(message_du_serveur);
+						message_du_serveur.setFont(new Font("Dialog", Font.PLAIN, 25));
+						message_du_serveur.setEditable(false);
+						message_du_serveur.setBackground(new Color(154, 153, 150));
+						c.addMessageListener(
+								p -> message_du_serveur.setText(c.formatageMessage(p)));
+						
+						ListeConversationsPanel panel_2 = new ListeConversationsPanel(c);
+						messages.add(panel_2);
 		valider.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (envoyer_message.isSelected()) {
