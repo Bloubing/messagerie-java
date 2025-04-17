@@ -99,7 +99,7 @@ public class ConversationFrame extends JFrame {
 					// si l'id et le message sont remplis on envoi
 					
 					c.sendPacket(interlocuteur, messageInput.getText().getBytes());
-					messageInput.setText("");
+					
 					if ( interlocuteur > 0) {
 						c.getDb().ajouterMessage(messageInput.getText(), c.getIdentifier(), interlocuteur);
 						rafraichir();
@@ -108,7 +108,7 @@ public class ConversationFrame extends JFrame {
 						c.getDb().ajouterMessageGroupe(messageInput.getText(), c.getIdentifier(), interlocuteur, interlocuteur);
 						rafraichirGroupe();
 					}
-					
+					messageInput.setText("");
 				}
 			}
 		});
