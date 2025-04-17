@@ -66,7 +66,7 @@ public class BaseDeDonnees_serveur {
 
     public ArrayList<Integer> getConnectedUsers() {
         ArrayList<Integer> connectedUsers = new ArrayList<Integer>();
-        String query = "SELECT id_u FROM users WHERE status=1";
+        String query = "SELECT id_u FROM user WHERE status=1";
         try (Statement stmt = connexion.createStatement()) {
             ResultSet rs = stmt.executeQuery(query);
             while (rs.next()) {
@@ -76,6 +76,7 @@ public class BaseDeDonnees_serveur {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        System.out.println("users connectés : " + connectedUsers);
         return connectedUsers;
     }
  
