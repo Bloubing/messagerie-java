@@ -13,9 +13,14 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.awt.event.ActionEvent;
 import fr.uga.miashs.dciss.chatservice.common.Message;
 import javax.swing.JTextArea;
+import javax.swing.border.LineBorder;
+import java.awt.Color;
+import java.awt.Font;
 
 
 public class ConversationFrame extends JFrame {
@@ -29,6 +34,9 @@ public class ConversationFrame extends JFrame {
 	private JPanel panelDenvoi;
 	private JTextArea messageInput;
 	private JButton envoyer;
+	private JPanel panelFichier;
+	private JTextArea fichierInput;
+	private JButton envoyerFichier;
 
 	/**
 	 * Launch the application.
@@ -61,10 +69,12 @@ public class ConversationFrame extends JFrame {
 		contentPane.setLayout(new BorderLayout(0, 0));
 		
 		listeMessages = new JPanel();
+		listeMessages.setBackground(new Color(153, 193, 241));
 		contentPane.add(listeMessages, BorderLayout.CENTER);
 		listeMessages.setLayout(new GridLayout(0, 1, 0, 0));
 		
 		JLabel titre = new JLabel("Votre conversation avec "+interlocuteur);
+		titre.setFont(new Font("Dialog", Font.BOLD, 25));
 		titre.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(titre, BorderLayout.NORTH);
 		
@@ -73,6 +83,7 @@ public class ConversationFrame extends JFrame {
 		panel.setLayout(new GridLayout(0, 1, 0, 0));
 		
 		panelDenvoi = new JPanel();
+		panelDenvoi.setBorder(new LineBorder(new Color(0, 0, 0)));
 		panel.add(panelDenvoi);
 		panelDenvoi.setLayout(new GridLayout(1, 0, 0, 0));
 		
@@ -85,14 +96,45 @@ public class ConversationFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if ( !(messageInput.getText().equals(""))) {
 					// si l'id et le message sont remplis on envoi
-					int dest = interlocuteur;
-					c.sendPacket(dest, messageInput.getText().getBytes());
-					c.getDb().ajouterMessage(messageInput.getText(), c.getIdentifier(), dest);
+					
+					c.sendPacket(interlocuteur, messageInput.getText().getBytes());
+					c.getDb().ajouterMessage(messageInput.getText(), c.getIdentifier(), interlocuteur);
 					messageInput.setText("");
 					rafraichir();
 				}
 			}
 		});
+		
+		panelFichier = new JPanel();
+		panelFichier.setBorder(new LineBorder(new Color(0, 0, 0)));
+		panel.add(panelFichier);
+		panelFichier.setLayout(new GridLayout(0, 2, 0, 0));
+		
+		fichierInput = new JTextArea();
+		panelFichier.add(fichierInput);
+		
+		envoyerFichier = new JButton("Transférer ce fichier(path)");
+		envoyerFichier.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(!fichierInput.getText().isEmpty()) {
+				String pathString = fichierInput.getText();
+							
+				try {
+					c.sendFile(interlocuteur, pathString);
+					
+
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+				fichierInput.setText("");
+				
+				}
+				rafraichir();
+			}
+		});
+		panelFichier.add(envoyerFichier);
 		
 		JButton refresh = new JButton("Rafraichir");
 		panel.add(refresh);
@@ -132,6 +174,9 @@ public class ConversationFrame extends JFrame {
 					a_mettre = message.getSrcId() +" : "+message.getMessage();
 				}
 				JLabel messageCourant = new JLabel(a_mettre);
+				messageCourant.setFont(new Font("Dialog", Font.BOLD, 20));
+
+
 				if ( message.getSrcId()== c.getIdentifier()) messageCourant.setHorizontalAlignment(SwingConstants.LEFT);
 				else {
 					messageCourant.setHorizontalAlignment(SwingConstants.RIGHT);

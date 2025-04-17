@@ -47,6 +47,7 @@ public class messagerieClientWindow {
 			}
 		});
 	}
+
 	/**
 	 * Create the application.
 	 * 
@@ -119,7 +120,7 @@ public class messagerieClientWindow {
 		JRadioButton renommer_groupe = new JRadioButton("Renommer un groupe");
 		buttonGroup.add(renommer_groupe);
 		panelOptions.add(renommer_groupe);
-		
+
 		JRadioButton transfert_fichier = new JRadioButton("Transférer un fichier");
 		buttonGroup.add(transfert_fichier);
 		panelOptions.add(transfert_fichier);
@@ -131,25 +132,24 @@ public class messagerieClientWindow {
 		JPanel messages = new JPanel();
 		frame.getContentPane().add(messages, BorderLayout.CENTER);
 		messages.setLayout(new GridLayout(0, 1, 0, 0));
-		
+
 		JPanel panel_1 = new JPanel();
 		messages.add(panel_1);
-				panel_1.setLayout(new BorderLayout(0, 0));
-		
-				JLabel messageServeurTitre = new JLabel("DERNIER MESSAGE : ");
-				panel_1.add(messageServeurTitre, BorderLayout.NORTH);
-				messageServeurTitre.setHorizontalAlignment(SwingConstants.CENTER);
-				
-						message_du_serveur = new JTextArea();
-						panel_1.add(message_du_serveur);
-						message_du_serveur.setFont(new Font("Dialog", Font.PLAIN, 25));
-						message_du_serveur.setEditable(false);
-						message_du_serveur.setBackground(new Color(154, 153, 150));
-						c.addMessageListener(
-								p -> message_du_serveur.setText(c.formatageMessage(p)));
-						c.addMessageListener(new MessageListenerImpl());
-						ListeConversationsPanel panel_2 = new ListeConversationsPanel(c);
-						messages.add(panel_2);
+		panel_1.setLayout(new BorderLayout(0, 0));
+
+		JLabel messageServeurTitre = new JLabel("DERNIER MESSAGE : ");
+		panel_1.add(messageServeurTitre, BorderLayout.NORTH);
+		messageServeurTitre.setHorizontalAlignment(SwingConstants.CENTER);
+
+		message_du_serveur = new JTextArea();
+		panel_1.add(message_du_serveur);
+		message_du_serveur.setFont(new Font("Dialog", Font.PLAIN, 25));
+		message_du_serveur.setEditable(false);
+		message_du_serveur.setBackground(new Color(154, 153, 150));
+		c.addMessageListener(p -> message_du_serveur.setText(c.formatageMessage(p)));
+		c.addMessageListener(new MessageListenerImpl());
+		ListeConversationsPanel panelConv = new ListeConversationsPanel(c);
+		messages.add(panelConv);
 		valider.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (envoyer_message.isSelected()) {
@@ -190,6 +190,5 @@ public class messagerieClientWindow {
 			}
 		});
 	}
-	
 
 }
