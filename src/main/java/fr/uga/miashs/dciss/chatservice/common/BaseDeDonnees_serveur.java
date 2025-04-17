@@ -1,5 +1,7 @@
 package fr.uga.miashs.dciss.chatservice.common;
+
 import java.sql.*;
+import java.util.ArrayList;
 
 public class BaseDeDonnees_serveur {
 
@@ -62,8 +64,23 @@ public class BaseDeDonnees_serveur {
         }
     }
 
+    public ArrayList<Integer> getConnectedUsers() {
+        ArrayList<Integer> connectedUsers = new ArrayList<Integer>();
+        String query = "SELECT id_u FROM users WHERE status=1";
+        try (Statement stmt = connexion.createStatement()) {
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                int userId = rs.getInt("id_u");
+                connectedUsers.add(userId);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return connectedUsers;
+    }
+ 
     public void supprimerGroupe(String groupName) {
-        System.out.println("ENTRE DANS SUPPRIMER GROUPE");
+        
          try (Statement stmt = connexion.createStatement()) {
             stmt.executeUpdate("DELETE FROM groupe WHERE nom =" + "\"" +groupName +"\"");
         } catch (SQLException e) {
