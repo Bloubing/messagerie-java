@@ -62,9 +62,10 @@ public class BaseDeDonnees_serveur {
         }
     }
 
-     public void supprimerGroupe(String groupName) {
+    public void supprimerGroupe(String groupName) {
+        System.out.println("ENTRE DANS SUPPRIMER GROUPE");
          try (Statement stmt = connexion.createStatement()) {
-            stmt.executeUpdate("DELETE FROM groupe WHERE nom =" + groupName);
+            stmt.executeUpdate("DELETE FROM groupe WHERE nom =" + "\"" +groupName +"\"");
         } catch (SQLException e) {
             e.printStackTrace();
         }
