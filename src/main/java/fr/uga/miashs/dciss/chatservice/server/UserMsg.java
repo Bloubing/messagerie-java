@@ -17,6 +17,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
 
+import fr.uga.miashs.dciss.chatservice.common.BaseDeDonnees_serveur;
 import fr.uga.miashs.dciss.chatservice.common.Packet;
 
 import java.util.*;
@@ -31,6 +32,7 @@ public class UserMsg implements PacketProcessor {
 	private ServerMsg server;
 	private transient Socket s;
 	private transient boolean active;
+	
 
 	private BlockingQueue<Packet> sendQueue;
 
@@ -43,6 +45,7 @@ public class UserMsg implements PacketProcessor {
 		active = false;
 		sendQueue = new LinkedBlockingQueue<>();
 		groups = Collections.synchronizedSet(new HashSet<>());
+		
 	}
 
 	public int getId() {
@@ -112,6 +115,7 @@ public class UserMsg implements PacketProcessor {
 			e.printStackTrace();
 		}
 		s = null;
+		this.server.getBddServ().deconnecter_user(userId);
 		LOG.info(userId + " deconnected");
 	}
 
