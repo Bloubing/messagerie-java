@@ -7,7 +7,7 @@ public class BaseDeDonnees_serveur {
 
     public BaseDeDonnees_serveur() {
         String baseDir = System.getProperty("user.dir");
-        String dbPath = baseDir + "/src/main/java/fr/uga/miashs/dciss/chatservice/database/database.sqlite";
+        String dbPath = baseDir + "/src/main/java/fr/uga/miashs/dciss/chatservice/database/database_serveur.sqlite";
         String url = "jdbc:sqlite:" + dbPath;
     
         try {
