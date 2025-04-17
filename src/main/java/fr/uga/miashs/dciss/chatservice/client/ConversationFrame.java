@@ -105,7 +105,7 @@ public class ConversationFrame extends JFrame {
 						rafraichir();
 					}
 					else {
-						c.getDb().ajouterMessageGroupe(message.getText(), c.getIdentifier(), interlocuteur, interlocuteur);
+						c.getDb().ajouterMessageGroupe(messageInput.getText(), c.getIdentifier(), interlocuteur, interlocuteur);
 						rafraichirGroupe();
 					}
 					
