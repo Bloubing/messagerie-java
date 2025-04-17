@@ -9,11 +9,13 @@ import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import fr.uga.miashs.dciss.chatservice.common.Message;
+import javax.swing.JTextArea;
 
 
 public class ConversationFrame extends JFrame {
@@ -23,6 +25,10 @@ public class ConversationFrame extends JFrame {
 	private ClientMsg c;
 	private int interlocuteur;
 	private JPanel listeMessages;
+	private JPanel panel;
+	private JPanel panelDenvoi;
+	private JTextArea messageInput;
+	private JButton envoyer;
 
 	/**
 	 * Launch the application.
@@ -54,14 +60,6 @@ public class ConversationFrame extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
 		
-		JButton refresh = new JButton("Rafraichir");
-		refresh.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				rafraichir();
-			}
-		});
-		contentPane.add(refresh, BorderLayout.SOUTH);
-		
 		listeMessages = new JPanel();
 		contentPane.add(listeMessages, BorderLayout.CENTER);
 		listeMessages.setLayout(new GridLayout(0, 1, 0, 0));
@@ -69,6 +67,40 @@ public class ConversationFrame extends JFrame {
 		JLabel titre = new JLabel("Votre conversation avec "+interlocuteur);
 		titre.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(titre, BorderLayout.NORTH);
+		
+		panel = new JPanel();
+		contentPane.add(panel, BorderLayout.SOUTH);
+		panel.setLayout(new GridLayout(0, 1, 0, 0));
+		
+		panelDenvoi = new JPanel();
+		panel.add(panelDenvoi);
+		panelDenvoi.setLayout(new GridLayout(1, 0, 0, 0));
+		
+		messageInput = new JTextArea();
+		panelDenvoi.add(messageInput);
+		
+		envoyer = new JButton("Envoyer");
+		panelDenvoi.add(envoyer);
+		envoyer.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if ( !(messageInput.getText().equals(""))) {
+					// si l'id et le message sont remplis on envoi
+					int dest = interlocuteur;
+					c.sendPacket(dest, messageInput.getText().getBytes());
+					c.getDb().ajouterMessage(messageInput.getText(), c.getIdentifier(), dest);
+					messageInput.setText("");
+					rafraichir();
+				}
+			}
+		});
+		
+		JButton refresh = new JButton("Rafraichir");
+		panel.add(refresh);
+		refresh.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				rafraichir();
+			}
+		});
 		TreeSet<Message> messages = c.getDb().messages_tous(interlocuteur);
 		for ( Message message : messages) {
 			String a_mettre;
