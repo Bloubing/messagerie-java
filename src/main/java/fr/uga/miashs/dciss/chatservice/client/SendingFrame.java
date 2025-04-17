@@ -82,7 +82,13 @@ public class SendingFrame extends JFrame {
 						return;
 					}
 					c.sendPacket(dest, message.getText().getBytes());
-					c.getDb().ajouterMessage(message.getText(), c.getIdentifier(), dest);
+					if ( dest > 0) {
+						c.getDb().ajouterMessage(message.getText(), c.getIdentifier(), dest);
+
+					}
+					else {
+						c.getDb().ajouterMessageGroupe(message.getText(), c.getIdentifier(), dest, dest);
+					}
 					c.getDb().ajouterConversation(c.getIdentifier(), dest);
 					JOptionPane.showMessageDialog(null, "Message envoyé");
 					fermer();

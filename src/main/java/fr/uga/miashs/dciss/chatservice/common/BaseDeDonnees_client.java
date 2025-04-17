@@ -36,6 +36,32 @@ public class BaseDeDonnees_client {
     
         return messages;
     }
+    public TreeSet<MessageGroupe> messagesGroupe_tous(int id_group) {
+        TreeSet<MessageGroupe> messages = new TreeSet<>();
+        String nomTable = "message_groupe_" + this.user_id; 
+        String where =  " WHERE ( id_forwarder="+this.user_id +" OR id_recipient="+this.user_id+" )"
+        		+ " AND id_group="+id_group ;
+        String query = "SELECT * FROM " + nomTable +
+        		where;
+        		
+        try (PreparedStatement pstmt = connexion.prepareStatement(query)) {
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                int forwarder = rs.getInt("id_forwarder");
+                int recipient = rs.getInt("id_recipient");
+                int group = rs.getInt("id_group");
+                String content = rs.getString("content");
+                MessageGroupe m = new MessageGroupe(id, forwarder, recipient, group, content);
+                messages.add(m);
+            }
+    
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    
+        return messages;
+    }
 
 
     public TreeSet<Message> messages_obtenus(int user_id) {
@@ -149,7 +175,19 @@ public class BaseDeDonnees_client {
                 "UNIQUE(member))";
         try (Statement stmt = connexion.createStatement()) {
             stmt.executeUpdate(create_table_client_conversations);}
-        }
+        String nom_table_client_messagesGroupes = "message_groupe_" + user_id;
+        String create_table_client_messagesGroupes = "CREATE TABLE IF NOT EXISTS " + nom_table_client_messagesGroupes + " (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "content TEXT," +
+                "id_forwarder INTEGER NOT NULL," +
+                "id_recipient INTEGER NOT NULL," +
+                "id_group INTEGER NOT NULL," +
+                "FOREIGN KEY (id_forwarder) REFERENCES user(id_u)," +
+                "FOREIGN KEY (id_recipient) REFERENCES user(id_u))";
+        try (Statement stmt = connexion.createStatement()) {
+            stmt.executeUpdate(create_table_client_messagesGroupes);}
+        
+    }
     
 
     public void ajouterMessage( String contenu, int id_forwarder, int id_recipient) {
@@ -158,6 +196,19 @@ public class BaseDeDonnees_client {
             pstmt.setString(1, contenu);
             pstmt.setInt(2, id_forwarder);
             pstmt.setInt(3, id_recipient);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public void ajouterMessageGroupe( String contenu, int id_forwarder, int id_recipient, int id_groupe ) {
+        String insert = "INSERT INTO message_groupe_" + user_id + " (content, id_forwarder, id_recipient, id_group ) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement pstmt = connexion.prepareStatement(insert)) {
+        	System.out.println("le contenu est : "+contenu);
+            pstmt.setString(1, contenu);
+            pstmt.setInt(2, id_forwarder);
+            pstmt.setInt(3, id_recipient);
+            pstmt.setInt(4, id_groupe);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -174,7 +225,7 @@ public class BaseDeDonnees_client {
             ResultSet rs = checkStmt.executeQuery();
     
             if (rs.next() && rs.getInt(1) > 0) {
-                System.err.println("Ce membre existe déjà dans la table !");
+            	System.out.println("Ce membre existe déjà dans la table !");
                 return;
             }
         } catch (SQLException e) {
@@ -194,10 +245,13 @@ public class BaseDeDonnees_client {
     private void viderTablesClient() {
         String nomTableMessages = "message_client_" + this.user_id;
         String nomTableConversations = "conversation_client_" + this.user_id;
-    
+        String nomTableGroupe = "message_groupe_" + this.user_id;
+
         try (Statement stmt = connexion.createStatement()) {
             stmt.executeUpdate("DROP TABLE " + nomTableMessages);
             stmt.executeUpdate("DROP TABLE " + nomTableConversations);
+            stmt.executeUpdate("DROP TABLE " + nomTableGroupe);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -17,11 +17,11 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.awt.event.ActionEvent;
 import fr.uga.miashs.dciss.chatservice.common.Message;
+import fr.uga.miashs.dciss.chatservice.common.MessageGroupe;
 import javax.swing.JTextArea;
 import javax.swing.border.LineBorder;
 import java.awt.Color;
 import java.awt.Font;
-
 
 public class ConversationFrame extends JFrame {
 
@@ -45,7 +45,7 @@ public class ConversationFrame extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					ConversationFrame frame = new ConversationFrame(new ClientMsg("localhost",1666), 1);
+					ConversationFrame frame = new ConversationFrame(new ClientMsg("localhost", 1666), 1);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -73,7 +73,8 @@ public class ConversationFrame extends JFrame {
 		contentPane.add(listeMessages, BorderLayout.CENTER);
 		listeMessages.setLayout(new GridLayout(0, 1, 0, 0));
 		
-		JLabel titre = new JLabel("Votre conversation avec "+interlocuteur);
+		JLabel titre = interlocuteur > 0 ? new JLabel("Votre conversation avec "+interlocuteur) : 
+			new JLabel("Votre conversation dans le groupe "+interlocuteur);
 		titre.setFont(new Font("Dialog", Font.BOLD, 25));
 		titre.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(titre, BorderLayout.NORTH);
@@ -98,13 +99,20 @@ public class ConversationFrame extends JFrame {
 					// si l'id et le message sont remplis on envoi
 					
 					c.sendPacket(interlocuteur, messageInput.getText().getBytes());
-					c.getDb().ajouterMessage(messageInput.getText(), c.getIdentifier(), interlocuteur);
 					messageInput.setText("");
-					rafraichir();
+					if ( interlocuteur > 0) {
+						c.getDb().ajouterMessage(messageInput.getText(), c.getIdentifier(), interlocuteur);
+						rafraichir();
+					}
+					else {
+						c.getDb().ajouterMessageGroupe(message.getText(), c.getIdentifier(), interlocuteur, interlocuteur);
+						rafraichirGroupe();
+					}
+					
 				}
 			}
 		});
-		
+		if ( interlocuteur > 0) {
 		panelFichier = new JPanel();
 		panelFichier.setBorder(new LineBorder(new Color(0, 0, 0)));
 		panel.add(panelFichier);
@@ -135,41 +143,71 @@ public class ConversationFrame extends JFrame {
 			}
 		});
 		panelFichier.add(envoyerFichier);
-		
+		}
 		JButton refresh = new JButton("Rafraichir");
 		panel.add(refresh);
 		refresh.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				rafraichir();
+				if ( interlocuteur > 0)
+					rafraichir();
+				else {
+					rafraichirGroupe();
+				}
 			}
 		});
 		
-		rafraichir();
+		if ( interlocuteur > 0)
+			rafraichir();
+		else {
+			rafraichirGroupe();
+		}
 		
 		}
-		public void rafraichir() {
-			listeMessages.removeAll();
-			TreeSet<Message> messages = c.getDb().messages_tous(interlocuteur);
-			for ( Message message : messages) {
-				String a_mettre;
-				if( message.getSrcId() == c.getIdentifier()) {
-					a_mettre = "Vous avez dit : "+message.getMessage();
-				}
-				else {
-					a_mettre = message.getSrcId() +" : "+message.getMessage();
-				}
-				JLabel messageCourant = new JLabel(a_mettre);
-				messageCourant.setFont(new Font("Dialog", Font.BOLD, 20));
 
+	public void rafraichir() {
+		listeMessages.removeAll();
+		TreeSet<Message> messages = c.getDb().messages_tous(interlocuteur);
+		for (Message message : messages) {
+			String a_mettre;
+			if (message.getSrcId() == c.getIdentifier()) {
+				a_mettre = "Vous avez dit : " + message.getMessage();
+			} else {
+				a_mettre = message.getSrcId() + " : " + message.getMessage();
+			}
+			JLabel messageCourant = new JLabel(a_mettre);
+			messageCourant.setFont(new Font("Dialog", Font.BOLD, 20));
 
-				if ( message.getSrcId()== c.getIdentifier()) messageCourant.setHorizontalAlignment(SwingConstants.LEFT);
-				else {
-					messageCourant.setHorizontalAlignment(SwingConstants.RIGHT);
-				}
-				listeMessages.add(messageCourant);
+			if (message.getSrcId() == c.getIdentifier())
+				messageCourant.setHorizontalAlignment(SwingConstants.LEFT);
+			else {
+				messageCourant.setHorizontalAlignment(SwingConstants.RIGHT);
+			}
+			listeMessages.add(messageCourant);
 
-				}
-			this.revalidate();
 		}
+		this.revalidate();
 	}
 
+	public void rafraichirGroupe() {
+		listeMessages.removeAll();
+		TreeSet<MessageGroupe> messages = c.getDb().messagesGroupe_tous(interlocuteur);
+		for (Message message : messages) {
+			String a_mettre;
+			if (message.getSrcId() == c.getIdentifier()) {
+				a_mettre = "Vous avez dit : " + message.getMessage();
+			} else {
+				a_mettre = message.getSrcId() + " : " + message.getMessage();
+			}
+			JLabel messageCourant = new JLabel(a_mettre);
+			messageCourant.setFont(new Font("Dialog", Font.BOLD, 20));
+
+			if (message.getSrcId() == c.getIdentifier())
+				messageCourant.setHorizontalAlignment(SwingConstants.LEFT);
+			else {
+				messageCourant.setHorizontalAlignment(SwingConstants.RIGHT);
+			}
+			listeMessages.add(messageCourant);
+		}
+		this.revalidate();
+	}
+}
