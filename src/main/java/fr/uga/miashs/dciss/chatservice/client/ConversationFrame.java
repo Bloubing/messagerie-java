@@ -143,23 +143,8 @@ public class ConversationFrame extends JFrame {
 				rafraichir();
 			}
 		});
-		TreeSet<Message> messages = c.getDb().messages_tous(interlocuteur);
-		for ( Message message : messages) {
-			String a_mettre;
-			if( message.getSrcId() == c.getIdentifier()) {
-				a_mettre = "Vous avez dit : "+message.getMessage();
-			}
-			else {
-				a_mettre = message.getSrcId() +" : "+message.getMessage();
-			}
-			JLabel messageCourant = new JLabel(a_mettre);
-			if ( message.getSrcId()== c.getIdentifier()) messageCourant.setHorizontalAlignment(SwingConstants.LEFT);
-			else {
-				messageCourant.setHorizontalAlignment(SwingConstants.RIGHT);
-			}
-			listeMessages.add(messageCourant);
-
-			}
+		
+		rafraichir();
 		
 		}
 		public void rafraichir() {
