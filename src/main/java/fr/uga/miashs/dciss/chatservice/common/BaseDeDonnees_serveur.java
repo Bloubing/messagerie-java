@@ -81,7 +81,7 @@ public class BaseDeDonnees_serveur {
     }
  
     public void supprimerGroupe(String groupName) {
-        
+        ArrayList<Integer> connectedUsers = new ArrayList<Integer>();
          try (Statement stmt = connexion.createStatement()) {
             stmt.executeUpdate("DELETE FROM groupe WHERE nom =" + "\"" +groupName +"\"");
         } catch (SQLException e) {
