@@ -34,6 +34,7 @@ public class messagerieClientWindow {
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	private ClientMsg c;
 	private JTextArea message_du_serveur;
+	private ListeConversationsPanel panelConv;
 
 	/**
 	 * Launch the application.
@@ -155,7 +156,7 @@ public class messagerieClientWindow {
 		message_du_serveur.setBackground(new Color(154, 153, 150));
 		
 		c.addMessageListener(new MessageListenerImpl());
-		ListeConversationsPanel panelConv = new ListeConversationsPanel(c, this);
+		panelConv = new ListeConversationsPanel(c, this);
 		messages.add(panelConv);
 		valider.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -198,6 +199,7 @@ public class messagerieClientWindow {
 		});
 	}
 	public  void revalidate() {
+		panelConv.revalidate();
 		frame.revalidate();
 	}
 	
