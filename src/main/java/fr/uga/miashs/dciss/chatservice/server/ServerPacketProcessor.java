@@ -157,8 +157,8 @@ public class ServerPacketProcessor implements PacketProcessor {
 		// et que l'utilisateur est owner
 		if (group != null && group.getOwner().getId() == ownerId) {
 			server.removeGroup(groupId, ownerId);
-
-			// Marche pas, pourquoi?
+			
+			
 			server.getBddServ().supprimerGroupe(groupNameRead);
 
 			LOG.info("Le groupe" + group.getName() + " a été supprimé");

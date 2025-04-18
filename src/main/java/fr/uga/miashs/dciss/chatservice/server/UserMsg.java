@@ -119,6 +119,7 @@ public class UserMsg implements PacketProcessor {
 		}
 		s = null;
 		this.server.getBddServ().deconnecter_user(userId);
+		this.server.getBddServ().getConnectedUsers();
 		LOG.info(userId + " deconnected");
 		this.server.sendConnected();
 	}
@@ -145,7 +146,9 @@ public class UserMsg implements PacketProcessor {
 					String nom = this.server.getGroups().get(destId).getName();
 					data = ByteBuffer.allocate(1 + (nom.length() * 2)+length);
 					data.put((byte)nom.length());
-					for (int i = 0; i < nom.length(); i++) {
+					System.out.println("at server nom check: ");
+                    for (int i = 0; i < nom.length(); i++) {
+                        System.out.println(nom.charAt(i));
 						data.putChar(nom.charAt(i));
 					}
 					data.put(content);

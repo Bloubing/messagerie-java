@@ -3,6 +3,7 @@ package fr.uga.miashs.dciss.chatservice.common;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.TreeSet;
+import java.util.ArrayList;
 
 public class BaseDeDonnees_serveur {
 
