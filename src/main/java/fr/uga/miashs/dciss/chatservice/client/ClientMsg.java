@@ -106,8 +106,10 @@ public class ClientMsg {
 				i +=1;
 			}
 			message.append(" : ");
-			message.append(new String(dataMessage));
-
+			String messageString = new String(dataMessage);
+			message.append(messageString);
+			getDb().ajouterMessageGroupe(messageString, p.srcId, getIdentifier() , p.destId);
+			getDb().ajouterConversation(getIdentifier(), p.destId);
 		}
 		else {
 			ByteBuffer data = ByteBuffer.wrap(p.data);

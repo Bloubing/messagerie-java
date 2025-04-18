@@ -80,7 +80,10 @@ public class TransfertFichierFrame extends JFrame {
 					String pathString = path.getText();
 					
 					int idMembreInt = Integer.parseInt(membreId.getText());
-					
+					if( idMembreInt == c.getIdentifier()) {
+						JOptionPane.showMessageDialog(null, "Vous ne pouvez pas envoyer de fichier à vous même !");
+						return;
+					}
 					try {
 						c.sendFile(idMembreInt, pathString);
 						

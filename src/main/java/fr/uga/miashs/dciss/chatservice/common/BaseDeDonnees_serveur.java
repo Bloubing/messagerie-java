@@ -1,5 +1,7 @@
 package fr.uga.miashs.dciss.chatservice.common;
+
 import java.sql.*;
+import java.util.ArrayList;
 
 public class BaseDeDonnees_serveur {
 
@@ -19,7 +21,16 @@ public class BaseDeDonnees_serveur {
     }
 
     private void initialiserBase_serveur() throws SQLException {
-    
+
+        try (Statement stmt = connexion.createStatement()) {
+            stmt.executeUpdate("DROP TABLE IF EXISTS user");
+            stmt.executeUpdate("DROP TABLE IF EXISTS groupe");
+            
+           
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+            
         String create_table_user = "CREATE TABLE IF NOT EXISTS user (id_u INTEGER PRIMARY KEY AUTOINCREMENT, nom TEXT, status INTEGER NOT NULL)";
         try (Statement stmt = connexion.createStatement()) {
             stmt.executeUpdate(create_table_user);
@@ -42,7 +53,7 @@ public class BaseDeDonnees_serveur {
         }
     }
 
-    public void ajouterGroupe( String nom, int owner) {
+    public void ajouterGroupe(String nom, int owner) {
         String insert = "INSERT INTO groupe" + " (nom, owner) VALUES (?, ?)";
         try (PreparedStatement pstmt = connexion.prepareStatement(insert)) {
             pstmt.setString(1, nom);
@@ -53,32 +64,42 @@ public class BaseDeDonnees_serveur {
         }
     }
 
-    private void supprimer_user(int user_id) {
-    
+    public ArrayList<Integer> getConnectedUsers() {
+        ArrayList<Integer> connectedUsers = new ArrayList<Integer>();
+        String query = "SELECT id_u FROM user WHERE status=1";
         try (Statement stmt = connexion.createStatement()) {
-            stmt.executeUpdate("DELETE FROM user WHERE id_u = " + user_id);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        try (Statement stmt = connexion.createStatement()) {
-            stmt.executeUpdate("DELETE FROM groupe WHERE owner = " + user_id);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }    
-
-    public void fermerConnexion(int user_id) {
-        try {
-            supprimer_user(user_id);
-            
-            if (connexion != null && !connexion.isClosed()) {
-                connexion.close();
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                int userId = rs.getInt("id_u");
+                connectedUsers.add(userId);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        System.out.println("users connectés : " + connectedUsers);
+        return connectedUsers;
     }
+ 
+    public void supprimerGroupe(String groupName) {
+        ArrayList<Integer> connectedUsers = new ArrayList<Integer>();
+         try (Statement stmt = connexion.createStatement()) {
+            stmt.executeUpdate("DELETE FROM groupe WHERE nom =" + "\"" +groupName +"\"");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void deconnecter_user(int user_id) {
+        try (Statement stmt = connexion.createStatement()) {
+            stmt.executeUpdate("UPDATE user SET status=0 WHERE id_u = " + user_id);
+            System.out.println("DECONNEXION EFFECTUEE");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+        
+   
 
 
 

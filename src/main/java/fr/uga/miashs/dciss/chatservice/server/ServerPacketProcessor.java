@@ -86,6 +86,8 @@ public class ServerPacketProcessor implements PacketProcessor {
 		String groupNameRead = this.readGroupNameFromData(data);
 		g.setName(groupNameRead);
 		
+		server.getBddServ().ajouterGroupe(groupNameRead, ownerId);
+
 		LOG.info("Groupe créé avec le nom de" + g.getName());
 	}
 	
@@ -121,6 +123,10 @@ public class ServerPacketProcessor implements PacketProcessor {
 		// et que l'utilisateur est owner
 		if (group != null && group.getOwner().getId() == ownerId) {
 			server.removeGroup(groupId, ownerId);
+			
+			
+			server.getBddServ().supprimerGroupe(groupNameRead);
+			
 			LOG.info("Le groupe" + group.getName() + " a été supprimé");
 
 		}

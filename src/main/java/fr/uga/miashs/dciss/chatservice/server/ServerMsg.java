@@ -17,6 +17,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
+import fr.uga.miashs.dciss.chatservice.common.BaseDeDonnees_serveur;
 import fr.uga.miashs.dciss.chatservice.common.Packet;
 
 import java.util.*;
@@ -40,6 +41,8 @@ public class ServerMsg {
 	// séquences pour générer les identifiant d'utilisateurs et de groupe
 	private AtomicInteger nextUserId;
 	private AtomicInteger nextGroupId;
+	private BaseDeDonnees_serveur bddServ;
+
 
 	public ServerMsg(int port) throws IOException {
 		serverSock = new ServerSocket(port);
@@ -50,8 +53,13 @@ public class ServerMsg {
 		nextGroupId = new AtomicInteger(-1);
 		sp = new ServerPacketProcessor(this);
 		executor = Executors.newCachedThreadPool();
+		bddServ = new BaseDeDonnees_serveur();
 	}
 	
+	public BaseDeDonnees_serveur getBddServ() {
+		return this.bddServ;
+	}
+
 	public GroupMsg createGroup(int ownerId) {
 		UserMsg owner = users.get(ownerId);
 		if (owner==null) throw new ServerException("User with id="+ownerId+" unknown. Group creation failed.");
@@ -127,6 +135,7 @@ public class ServerMsg {
 					dos.writeInt(userId);
 					dos.flush();
 					users.put(userId, new UserMsg(userId, this));
+					bddServ.ajouterUser(null, 1);
 				}
 				// si l'identifiant existe ou est nouveau alors 
 				// deux "taches"/boucles  sont lancées en parralèle
@@ -154,6 +163,7 @@ public class ServerMsg {
 	public void stop() {
 		started = false;
 		try {
+			
 			serverSock.close();
 			users.values().forEach(s -> s.close());
 		} catch (IOException e) {

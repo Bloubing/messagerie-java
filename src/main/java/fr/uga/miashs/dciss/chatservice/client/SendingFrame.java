@@ -73,11 +73,22 @@ public class SendingFrame extends JFrame {
 		JButton envoyer = new JButton("Envoyer");
 		envoyer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				
 				if ( (!id.getText().equals("")) || !(message.getText().equals(""))) {
 					// si l'id et le message sont remplis on envoi
 					int dest = Integer.parseInt(id.getText());
+					if ( dest == c.getIdentifier()) {
+						JOptionPane.showMessageDialog(null, "Vous ne pouvez pas envoyer de message à vous même !");
+						return;
+					}
 					c.sendPacket(dest, message.getText().getBytes());
-					c.getDb().ajouterMessage(message.getText(), c.getIdentifier(), dest);
+					if ( dest > 0) {
+						c.getDb().ajouterMessage(message.getText(), c.getIdentifier(), dest);
+
+					}
+					else {
+						c.getDb().ajouterMessageGroupe(message.getText(), c.getIdentifier(), dest, dest);
+					}
 					c.getDb().ajouterConversation(c.getIdentifier(), dest);
 					JOptionPane.showMessageDialog(null, "Message envoyé");
 					fermer();

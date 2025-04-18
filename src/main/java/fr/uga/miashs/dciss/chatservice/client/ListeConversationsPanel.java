@@ -63,6 +63,7 @@ public class ListeConversationsPanel extends JPanel {
 				rafraichir();
 			}
 		});
+		rafraichir();
 	
 	}
 	public void rafraichir() {
