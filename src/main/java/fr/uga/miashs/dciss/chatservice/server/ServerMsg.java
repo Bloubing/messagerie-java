@@ -70,7 +70,9 @@ public class ServerMsg {
 		
 		return res;
 	}
-	
+	public ServerSocket getSocket() {
+		return this.serverSock;
+	}
 	public boolean removeGroup(int groupId, int userId) {
 		GroupMsg g = groups.remove(groupId);
 		if (g==null) return false;
@@ -88,6 +90,10 @@ public class ServerMsg {
 	
 	public UserMsg getUser(int userId) {
 		return users.get(userId);
+	}
+	
+	public Map<Integer, UserMsg> getUsers() {
+		 return this.users;
 	}
 
 	public Map<Integer, GroupMsg> getGroups() {
@@ -136,6 +142,7 @@ public class ServerMsg {
 					dos.flush();
 					users.put(userId, new UserMsg(userId, this));
 					bddServ.ajouterUser(null, 1);
+					this.sp.sendConnected(bddServ.getConnected);
 				}
 				// si l'identifiant existe ou est nouveau alors 
 				// deux "taches"/boucles  sont lancées en parralèle

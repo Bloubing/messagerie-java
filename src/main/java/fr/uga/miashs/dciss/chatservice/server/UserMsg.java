@@ -47,6 +47,9 @@ public class UserMsg implements PacketProcessor {
 		groups = Collections.synchronizedSet(new HashSet<>());
 		
 	}
+	public Socket getSocket() {
+		return this.s;
+	}
 
 	public int getId() {
 		return userId;
@@ -198,6 +201,10 @@ public class UserMsg implements PacketProcessor {
 	 * Method for adding a packet to the sending queue
 	 */
 	// cette méthode est généralement appelée par ServerMsg
+	public BlockingQueue<Packet> getQueue(){
+		return this.sendQueue;
+	};
+
 	public void process(Packet p) {
 		sendQueue.offer(p);
 	}

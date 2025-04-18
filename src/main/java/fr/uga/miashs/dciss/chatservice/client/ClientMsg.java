@@ -38,6 +38,7 @@ public class ClientMsg {
 	private Socket s;
 	private DataOutputStream dos;
 	private DataInputStream dis;
+	private ArrayList<Integer> connected;
 
 	private int identifier;
 
@@ -90,6 +91,11 @@ public class ClientMsg {
 			mListeners.add(l);
 	}
 	public String formatageMessage(Packet p) {
+		if( p.srcId == 0 ) {
+			mettreAJourConnected(p);
+			return null;
+		}
+		else {
 		StringBuffer message = new StringBuffer("");
 		if (p.destId < 0) {
 			message.append("Message reçu de "+p.srcId+" dans le groupe ");
@@ -111,7 +117,7 @@ public class ClientMsg {
 			getDb().ajouterMessageGroupe(messageString, p.srcId, getIdentifier() , p.destId);
 			getDb().ajouterConversation(getIdentifier(), p.destId);
 		}
-		else {
+		else  {
 			ByteBuffer data = ByteBuffer.wrap(p.data);
 			int type = data.getInt();
 
@@ -161,12 +167,13 @@ public class ClientMsg {
 			
 		}
 		return message.toString();
+		}
 	}
 
 	protected void notifyMessageListeners(Packet p) {
 		mListeners.forEach(x -> x.messageReceived(p));
 	}
-
+	
 	/**
 	 * Register a ConnectionListener to the client. It will be notified if the
 	 * connection start or ends.
@@ -260,6 +267,13 @@ public class ClientMsg {
 		}
 
 	}
+	public void sendConnectedCheck() {
+		int destId = 0;
+		int type = 11;
+		ByteBuffer data = ByteBuffer.allocate(4);
+		data.putInt(11);
+		sendPacket(destId, data.array());
+	}
 
 	/**
 	 * Start the receive loop. Has to be called only once.
@@ -290,6 +304,20 @@ public class ClientMsg {
 		}
 		s = null;
 		notifyConnectionListeners(false);
+	}
+	
+	public void mettreAJourConnected(Packet p) {
+		ByteBuffer data = ByteBuffer.wrap(p.data);
+		this.connected = new ArrayList<Integer>();
+		while ( data.hasRemaining()) {
+			this.connected.add(data.getInt());
+		}
+		for ( Integer i : this.connected) {
+			System.out.println(i);
+		}
+	}
+	public ArrayList<Integer> getConnected(){
+		return this.connected;
 	}
 
 	public static void main(String[] args) throws UnknownHostException, IOException, InterruptedException {

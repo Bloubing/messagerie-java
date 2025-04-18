@@ -19,6 +19,9 @@ import javax.swing.JTextPane;
 import javax.swing.JTextField;
 import java.awt.Color;
 import javax.swing.SwingConstants;
+
+import fr.uga.miashs.dciss.chatservice.common.Packet;
+
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -146,8 +149,13 @@ public class messagerieClientWindow {
 		message_du_serveur.setFont(new Font("Dialog", Font.PLAIN, 25));
 		message_du_serveur.setEditable(false);
 		message_du_serveur.setBackground(new Color(154, 153, 150));
-		c.addMessageListener(p -> message_du_serveur.setText(c.formatageMessage(p)));
+		c.addMessageListener(p -> {
+			String s = c.formatageMessage(p);
+			if ( s != null)
+				message_du_serveur.setText(s);
+		});
 		c.addMessageListener(new MessageListenerImpl());
+		c.sendConnectedCheck();
 		ListeConversationsPanel panelConv = new ListeConversationsPanel(c);
 		messages.add(panelConv);
 		valider.addActionListener(new ActionListener() {
@@ -190,5 +198,7 @@ public class messagerieClientWindow {
 			}
 		});
 	}
+	
+	
 
 }

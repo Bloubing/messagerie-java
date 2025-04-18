@@ -11,6 +11,8 @@
 
 package fr.uga.miashs.dciss.chatservice.server;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.logging.Logger;
 
@@ -26,11 +28,12 @@ public class ServerPacketProcessor implements PacketProcessor {
 
 	@Override
 	public void process(Packet p) {
-		// ByteBufferVersion. On aurait pu utiliser un ByteArrayInputStream + DataInputStream à la place
+		// ByteBufferVersion. On aurait pu utiliser un ByteArrayInputStream +
+		// DataInputStream à la place
 		ByteBuffer buf = ByteBuffer.wrap(p.data);
-		
+
 		int type = buf.getInt();
-		System.out.println("le type est"+type);
+		System.out.println("le type est" + type);
 		if (type == 1) { // cas creation de groupe
 			this.createGroup(p.srcId, buf);
 		} else if (type == 2) {
@@ -43,12 +46,36 @@ public class ServerPacketProcessor implements PacketProcessor {
 			this.removeOtherMember(p.srcId, buf);
 		} else if (type == 6) {
 			this.renameGroup(p.srcId, buf);
-		}
-		else {
+		} else if (type == 11) {
+			this.sendConnected(p.srcId);
+		} else {
 			LOG.warning("Server message of type=" + type + " not handled by procesor");
 		}
 	}
-	
+
+	public void sendConnected(int src) {
+		ByteBuffer connected = ByteBuffer.allocate(this.server.getUsers().size() * 4);
+		for (Integer i : this.server.getUsers().keySet()) {
+			connected.putInt(i);
+		}
+		Packet p = new Packet(0, src, connected.array());
+		LOG.info("prêt à envoyer paquet");
+		UserMsg user = this.server.getUser(src);
+		this.server.getUser(src).process(p);
+		this.server.getUser(src).getQueue().poll();
+		try {
+		DataOutputStream dos = new DataOutputStream(user.getSocket().getOutputStream());
+			dos.writeInt(p.srcId);
+			dos.writeInt(p.destId);
+			dos.writeInt(p.data.length);
+			dos.write(p.data);
+			dos.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	public String readGroupNameFromData(ByteBuffer data) {
 		// Lire le nom du groupe
 		StringBuffer groupNameBuffer = new StringBuffer();
@@ -60,7 +87,7 @@ public class ServerPacketProcessor implements PacketProcessor {
 
 		return groupName;
 	}
-	
+
 	public String readGroupNameFromData(ByteBuffer data, int length) {
 		// Lire le nom du groupe
 		StringBuffer groupNameBuffer = new StringBuffer();
@@ -69,7 +96,7 @@ public class ServerPacketProcessor implements PacketProcessor {
 			groupNameBuffer.append(data.getChar());
 		}
 		String groupName = groupNameBuffer.toString();
-		
+
 		return groupName;
 	}
 
@@ -82,21 +109,21 @@ public class ServerPacketProcessor implements PacketProcessor {
 		for (int i = 0; i < nbMembres; i++) {
 			g.addMember(server.getUser(data.getInt()));
 		}
-		
+
 		String groupNameRead = this.readGroupNameFromData(data);
 		g.setName(groupNameRead);
-		
+
 		server.getBddServ().ajouterGroupe(groupNameRead, ownerId);
 
 		LOG.info("Groupe créé avec le nom de" + g.getName());
 	}
-	
-	//type 2 : quitter un groupe
+
+	// type 2 : quitter un groupe
 	public void removeUser(int userId, ByteBuffer data) {
 		System.out.println("rentré dans type2");
 		UserMsg user = server.getUser(userId);
 		String groupNameRead = this.readGroupNameFromData(data);
-		// On cherche le groupe à quitter parmi 
+		// On cherche le groupe à quitter parmi
 		// les groupes auxquels appartient l'user
 		// Si non trouvé : groupe == null
 		GroupMsg group = user.getGroup(groupNameRead);
@@ -114,7 +141,7 @@ public class ServerPacketProcessor implements PacketProcessor {
 		UserMsg ownerUser = server.getUser(ownerId);
 		int groupId = ownerUser.getGroup(groupNameRead).getId();
 
-		// On cherche le groupe à supprimer parmi 
+		// On cherche le groupe à supprimer parmi
 		// les groupes auxquels appartient l'user
 		// Si non trouvé : groupe == null
 		GroupMsg group = ownerUser.getGroup(groupNameRead);
@@ -123,20 +150,19 @@ public class ServerPacketProcessor implements PacketProcessor {
 		// et que l'utilisateur est owner
 		if (group != null && group.getOwner().getId() == ownerId) {
 			server.removeGroup(groupId, ownerId);
-			
+
 			// Marche pas, pourquoi?
 			server.getBddServ().supprimerGroupe(groupNameRead);
-			
+
 			LOG.info("Le groupe" + group.getName() + " a été supprimé");
 
 		}
 
-
 	}
 
-	//type 4 : ajouter un membre
+	// type 4 : ajouter un membre
 	public void addMember(int userId, ByteBuffer data) {
-		int memberIdToAdd = data.getInt();      // id du membre à ajouter
+		int memberIdToAdd = data.getInt(); // id du membre à ajouter
 		UserMsg userAjouteur = server.getUser(userId); // L'utilisateur qui exécute l'action addMembre
 		String groupNameRead = this.readGroupNameFromData(data);
 
@@ -144,21 +170,19 @@ public class ServerPacketProcessor implements PacketProcessor {
 		// parmi les groupes de l'utilisateur qui ajoute le nouveau membre
 		// Si pas trouvé : group == null
 		GroupMsg group = userAjouteur.getGroup(groupNameRead);
-			
-		
+
 		// Si le groupe existe
 		if (group != null) {
 			UserMsg newMember = server.getUser(memberIdToAdd); // On récupère le nouveau membre à ajouter
 			// On n’ajoute le nouveau membre que s’il n’est pas déjà membre de ce groupe
 			if (!group.getMembers().contains(newMember)) {
 				group.addMember(newMember);
-			LOG.info("Membre: " + memberIdToAdd + "a été ajouté au groupe " + group.getName() + " par " + userId);
+				LOG.info("Membre: " + memberIdToAdd + "a été ajouté au groupe " + group.getName() + " par " + userId);
 
 			}
 		}
 
 	}
-
 
 	// type 5 : retirer un membre
 	public void removeOtherMember(int ownerId, ByteBuffer data) {
@@ -169,7 +193,8 @@ public class ServerPacketProcessor implements PacketProcessor {
 		UserMsg user = server.getUser(ownerId);
 		UserMsg memberToRemove = server.getUser(memberToRemoveId);
 
-		// On cherche le groupe qui a groupe ID parmi tous les groupes auxquels appartient "user", null sinon
+		// On cherche le groupe qui a groupe ID parmi tous les groupes auxquels
+		// appartient "user", null sinon
 		GroupMsg group = user.getGroup(groupNameRead);
 
 		// Si le groupe existe et que l'utilisateur user est owner de ce groupe
@@ -178,7 +203,7 @@ public class ServerPacketProcessor implements PacketProcessor {
 			LOG.info("User: " + memberToRemoveId + "a été retiré du groupe " + group.getName() + " par " + ownerId);
 		}
 	}
-	
+
 	// type 6
 	public void renameGroup(int userId, ByteBuffer data) {
 		// Lecture du paquet
@@ -190,7 +215,7 @@ public class ServerPacketProcessor implements PacketProcessor {
 		// On tente de récupérer le groupe à partir des
 		// groupes auxquels appartient le user
 		// => pour renommer un groupe, l'user doit faire partie
-		// du groupe 
+		// du groupe
 		// Si pas trouvé groupe == null
 		GroupMsg group = user.getGroup(groupNameToChangeRead);
 		if (group != null) {
@@ -203,8 +228,3 @@ public class ServerPacketProcessor implements PacketProcessor {
 	}
 
 }
-
-
-
-
-

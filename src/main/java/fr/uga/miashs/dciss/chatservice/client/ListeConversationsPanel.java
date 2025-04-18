@@ -60,6 +60,7 @@ public class ListeConversationsPanel extends JPanel {
 		
 		refresh.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				c.sendConnectedCheck();
 				rafraichir();
 			}
 		});
