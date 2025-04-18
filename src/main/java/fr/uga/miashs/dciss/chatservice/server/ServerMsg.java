@@ -142,7 +142,6 @@ public class ServerMsg {
 					dos.flush();
 					users.put(userId, new UserMsg(userId, this));
 					bddServ.ajouterUser(null, 1);
-					this.sp.sendConnected(bddServ.getConnected);
 				}
 				// si l'identifiant existe ou est nouveau alors 
 				// deux "taches"/boucles  sont lancées en parralèle
@@ -156,6 +155,7 @@ public class ServerMsg {
 					executor.submit(() -> x.receiveLoop());
 					// lancement boucle d'envoi
 					executor.submit(() -> x.sendLoop());
+					sendConnected();
 				} else { // si l'idenfiant est inconnu, on ferme la connexion
 					s.close();
 				}
@@ -166,7 +166,10 @@ public class ServerMsg {
 			}
 		}
 	}
-
+	public void sendConnected() {
+		LOG.info("ouié");
+		this.sp.sendConnected(bddServ.getConnected());
+	}
 	public void stop() {
 		started = false;
 		try {

@@ -267,13 +267,6 @@ public class ClientMsg {
 		}
 
 	}
-	public void sendConnectedCheck() {
-		int destId = 0;
-		int type = 11;
-		ByteBuffer data = ByteBuffer.allocate(4);
-		data.putInt(11);
-		sendPacket(destId, data.array());
-	}
 
 	/**
 	 * Start the receive loop. Has to be called only once.
@@ -313,7 +306,8 @@ public class ClientMsg {
 			this.connected.add(data.getInt());
 		}
 		for ( Integer i : this.connected) {
-			System.out.println(i);
+			System.out.println("liste des users connected : ");
+			System.out.print(i + ",");
 		}
 	}
 	public ArrayList<Integer> getConnected(){

@@ -14,6 +14,7 @@ package fr.uga.miashs.dciss.chatservice.server;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import fr.uga.miashs.dciss.chatservice.common.Packet;
@@ -46,34 +47,40 @@ public class ServerPacketProcessor implements PacketProcessor {
 			this.removeOtherMember(p.srcId, buf);
 		} else if (type == 6) {
 			this.renameGroup(p.srcId, buf);
-		} else if (type == 11) {
-			this.sendConnected(p.srcId);
 		} else {
 			LOG.warning("Server message of type=" + type + " not handled by procesor");
 		}
 	}
 
-	public void sendConnected(int src) {
-		ByteBuffer connected = ByteBuffer.allocate(this.server.getUsers().size() * 4);
-		for (Integer i : this.server.getUsers().keySet()) {
-			connected.putInt(i);
+	public void sendConnected(ArrayList<Integer> connected) {
+//		try {
+//			wait(1000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		ByteBuffer connectedBuffer = ByteBuffer.allocate(connected.size() * 4);
+		for (Integer user : connected) {
+			connectedBuffer.putInt(user);
 		}
-		Packet p = new Packet(0, src, connected.array());
-		LOG.info("prêt à envoyer paquet");
-		UserMsg user = this.server.getUser(src);
-		this.server.getUser(src).process(p);
-		this.server.getUser(src).getQueue().poll();
-		try {
-		DataOutputStream dos = new DataOutputStream(user.getSocket().getOutputStream());
-			dos.writeInt(p.srcId);
-			dos.writeInt(p.destId);
-			dos.writeInt(p.data.length);
-			dos.write(p.data);
-			dos.flush();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		System.out.println(connected);
+		// On crée une boucle d'envoie à chaque user
+		for (Integer user : connected) {
+			Packet p = new Packet(0, user, connectedBuffer.array());
+			UserMsg usrCourant = server.getUser(user);
+			try {
+				DataOutputStream dos = new DataOutputStream(usrCourant.getSocket().getOutputStream());
+				dos.writeInt(p.srcId);
+				dos.writeInt(p.destId);
+				dos.writeInt(p.data.length);
+				dos.write(p.data);
+				dos.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+
 	}
 
 	public String readGroupNameFromData(ByteBuffer data) {

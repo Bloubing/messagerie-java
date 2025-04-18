@@ -97,7 +97,10 @@ public class ConversationFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if ( !(messageInput.getText().equals(""))) {
 					// si l'id et le message sont remplis on envoi
-					
+					if ( !c.getConnected().contains(interlocuteur) && interlocuteur > 0) {
+						JOptionPane.showMessageDialog(null, "L'utilisateur "+ interlocuteur + " N'est plus connecté");
+						return;
+					}
 					c.sendPacket(interlocuteur, messageInput.getText().getBytes());
 					
 					if ( interlocuteur > 0) {

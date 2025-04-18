@@ -120,6 +120,7 @@ public class UserMsg implements PacketProcessor {
 		s = null;
 		this.server.getBddServ().deconnecter_user(userId);
 		LOG.info(userId + " deconnected");
+		this.server.sendConnected();
 	}
 
 	public boolean isConnected() {

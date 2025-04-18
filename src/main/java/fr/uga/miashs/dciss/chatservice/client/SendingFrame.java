@@ -73,7 +73,6 @@ public class SendingFrame extends JFrame {
 		JButton envoyer = new JButton("Envoyer");
 		envoyer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				c.sendConnectedCheck();
 				if ( (!id.getText().equals("")) || !(message.getText().equals(""))) {
 					// si l'id et le message sont remplis on envoi
 					int dest = Integer.parseInt(id.getText());
@@ -81,7 +80,7 @@ public class SendingFrame extends JFrame {
 						JOptionPane.showMessageDialog(null, "Vous ne pouvez pas envoyer de message à vous même !");
 						return;
 					}
-					if ( !c.getConnected().contains(dest)) {
+					if ( !c.getConnected().contains(dest) && dest > 0) {
 						JOptionPane.showMessageDialog(null, "L'utilisateur "+ dest + " N'est pas connecté");
 						return;
 					}
