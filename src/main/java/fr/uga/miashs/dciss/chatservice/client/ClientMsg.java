@@ -106,7 +106,7 @@ public class ClientMsg {
 				for (int i = 0; i < longueurNom; i++) {
 					message.append(data.getChar());
 				}
-
+				System.out.println(message);
 				byte[] dataMessage = new byte[data.remaining()];
 				int i = 0;
 				while (data.hasRemaining()) {
