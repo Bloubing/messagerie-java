@@ -156,7 +156,7 @@ public class messagerieClientWindow {
 		message_du_serveur.setBackground(new Color(154, 153, 150));
 
 		c.addMessageListener(new MessageListenerImpl());
-		panelConv = new ListeConversationsPanel(c, this);
+		panelConv = new ListeConversationsPanel(c);
 		messages.add(panelConv);
 		valider.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
