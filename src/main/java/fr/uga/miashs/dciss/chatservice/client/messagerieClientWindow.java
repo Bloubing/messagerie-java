@@ -199,9 +199,6 @@ public class messagerieClientWindow {
 		});
 	}
 
-	public void revalidate() {
-		panelConv.revalidate();
-		frame.revalidate();
-	}
+	
 
 }

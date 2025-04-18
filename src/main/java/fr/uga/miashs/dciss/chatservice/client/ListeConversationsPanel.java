@@ -15,15 +15,13 @@ public class ListeConversationsPanel extends JPanel {
 	JPanel liste;
 	JScrollPane scrollPane;
 	ClientMsg c;
-	messagerieClientWindow m;
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Create the panel.
 	 */
-	public ListeConversationsPanel(ClientMsg c, messagerieClientWindow m) {
+	public ListeConversationsPanel(ClientMsg c) {
 		this.c = c;
-		this.m = m;
 		setLayout(new BorderLayout(0, 0));
 
 		JLabel lblNewLabel = new JLabel("Vos conversations :");
@@ -90,7 +88,7 @@ public class ListeConversationsPanel extends JPanel {
 					}
 				});
 				liste.add(panelCourant);
-				m.revalidate();
+				this.revalidate();
 
 			}
 		}
