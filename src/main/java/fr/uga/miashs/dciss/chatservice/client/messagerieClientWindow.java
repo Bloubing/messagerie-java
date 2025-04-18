@@ -78,6 +78,7 @@ public class messagerieClientWindow {
 			if (s != null)
 				message_du_serveur.setText(s);
 		});
+		c.addMessageListener(new MessageListenerImpl());
 		c.startSession();
 		frame = new JFrame();
 		frame.addWindowListener(new WindowAdapter() {
@@ -155,7 +156,6 @@ public class messagerieClientWindow {
 		message_du_serveur.setEditable(false);
 		message_du_serveur.setBackground(new Color(154, 153, 150));
 
-		c.addMessageListener(new MessageListenerImpl());
 		panelConv = new ListeConversationsPanel(c);
 		messages.add(panelConv);
 		valider.addActionListener(new ActionListener() {

@@ -119,7 +119,6 @@ public class ClientMsg {
 		} else {
 			ByteBuffer data = ByteBuffer.wrap(p.data);
 			int type = data.getInt();
-
 			if (type != 10) {
 				message.append("Message reçu de " + p.srcId + " : ");
 				String text = new String(p.data);

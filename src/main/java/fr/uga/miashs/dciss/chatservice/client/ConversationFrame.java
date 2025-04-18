@@ -67,105 +67,104 @@ public class ConversationFrame extends JFrame {
 
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
-		
+
 		listeMessages = new JPanel();
 		listeMessages.setBackground(new Color(153, 193, 241));
 		contentPane.add(listeMessages, BorderLayout.CENTER);
 		listeMessages.setLayout(new GridLayout(0, 1, 0, 0));
-		
-		JLabel titre = interlocuteur > 0 ? new JLabel("Votre conversation avec "+interlocuteur) : 
-			new JLabel("Votre conversation dans le groupe "+interlocuteur);
+
+		JLabel titre = interlocuteur > 0 ? new JLabel("Votre conversation avec " + interlocuteur)
+				: new JLabel("Votre conversation dans le groupe " + interlocuteur);
 		titre.setFont(new Font("Dialog", Font.BOLD, 25));
 		titre.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(titre, BorderLayout.NORTH);
-		
+
 		panel = new JPanel();
 		contentPane.add(panel, BorderLayout.SOUTH);
 		panel.setLayout(new GridLayout(0, 1, 0, 0));
-		
+
 		panelDenvoi = new JPanel();
 		panelDenvoi.setBorder(new LineBorder(new Color(0, 0, 0)));
 		panel.add(panelDenvoi);
 		panelDenvoi.setLayout(new GridLayout(1, 0, 0, 0));
-		
+
 		messageInput = new JTextArea();
 		panelDenvoi.add(messageInput);
-		
+
 		envoyer = new JButton("Envoyer");
 		panelDenvoi.add(envoyer);
 		envoyer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if ( !(messageInput.getText().equals(""))) {
+				if (!(messageInput.getText().equals(""))) {
 					// si l'id et le message sont remplis on envoi
-					if ( !c.getConnected().contains(interlocuteur) && interlocuteur > 0) {
-						JOptionPane.showMessageDialog(null, "L'utilisateur "+ interlocuteur + " N'est plus connecté");
+					if (!c.getConnected().contains(interlocuteur) && interlocuteur > 0) {
+						JOptionPane.showMessageDialog(null, "L'utilisateur " + interlocuteur + " N'est plus connecté");
 						return;
 					}
 					c.sendPacket(interlocuteur, messageInput.getText().getBytes());
-					
-					if ( interlocuteur > 0) {
+
+					if (interlocuteur > 0) {
 						c.getDb().ajouterMessage(messageInput.getText(), c.getIdentifier(), interlocuteur);
 						rafraichir();
-					}
-					else {
-						c.getDb().ajouterMessageGroupe(messageInput.getText(), c.getIdentifier(), interlocuteur, interlocuteur);
+					} else {
+						c.getDb().ajouterMessageGroupe(messageInput.getText(), c.getIdentifier(), interlocuteur,
+								interlocuteur);
 						rafraichirGroupe();
 					}
 					messageInput.setText("");
 				}
 			}
 		});
-		if ( interlocuteur > 0) {
-		panelFichier = new JPanel();
-		panelFichier.setBorder(new LineBorder(new Color(0, 0, 0)));
-		panel.add(panelFichier);
-		panelFichier.setLayout(new GridLayout(0, 2, 0, 0));
-		
-		fichierInput = new JTextArea();
-		panelFichier.add(fichierInput);
-		
-		envoyerFichier = new JButton("Transférer ce fichier(path)");
-		envoyerFichier.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if(!fichierInput.getText().isEmpty()) {
-				String pathString = fichierInput.getText();
-							
-				try {
-					c.sendFile(interlocuteur, pathString);
-					
+		if (interlocuteur > 0) {
+			panelFichier = new JPanel();
+			panelFichier.setBorder(new LineBorder(new Color(0, 0, 0)));
+			panel.add(panelFichier);
+			panelFichier.setLayout(new GridLayout(0, 2, 0, 0));
 
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+			fichierInput = new JTextArea();
+			panelFichier.add(fichierInput);
+
+			envoyerFichier = new JButton("Transférer ce fichier(path)");
+			envoyerFichier.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if (!fichierInput.getText().isEmpty()) {
+						String pathString = fichierInput.getText();
+
+						try {
+							c.sendFile(interlocuteur, pathString);
+
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+
+						fichierInput.setText("");
+
+					}
+					rafraichir();
 				}
-				
-				fichierInput.setText("");
-				
-				}
-				rafraichir();
-			}
-		});
-		panelFichier.add(envoyerFichier);
+			});
+			panelFichier.add(envoyerFichier);
 		}
 		JButton refresh = new JButton("Rafraichir");
 		panel.add(refresh);
 		refresh.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if ( interlocuteur > 0)
+				if (interlocuteur > 0)
 					rafraichir();
 				else {
 					rafraichirGroupe();
 				}
 			}
 		});
-		
-		if ( interlocuteur > 0)
+
+		if (interlocuteur > 0)
 			rafraichir();
 		else {
 			rafraichirGroupe();
 		}
-		
-		}
+
+	}
 
 	public void rafraichir() {
 		listeMessages.removeAll();
