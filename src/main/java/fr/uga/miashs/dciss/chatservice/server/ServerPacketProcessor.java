@@ -53,12 +53,7 @@ public class ServerPacketProcessor implements PacketProcessor {
 	}
 
 	public void sendConnected(ArrayList<Integer> connected) {
-//		try {
-//			wait(1000);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+
 		ByteBuffer connectedBuffer = ByteBuffer.allocate(connected.size() * 4);
 		for (Integer user : connected) {
 			connectedBuffer.putInt(user);
@@ -157,8 +152,7 @@ public class ServerPacketProcessor implements PacketProcessor {
 		// et que l'utilisateur est owner
 		if (group != null && group.getOwner().getId() == ownerId) {
 			server.removeGroup(groupId, ownerId);
-			
-			
+
 			server.getBddServ().supprimerGroupe(groupNameRead);
 
 			LOG.info("Le groupe" + group.getName() + " a été supprimé");

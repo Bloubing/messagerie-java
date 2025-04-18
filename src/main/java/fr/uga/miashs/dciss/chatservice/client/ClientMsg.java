@@ -64,7 +64,7 @@ public class ClientMsg {
 		mListeners = new ArrayList<>();
 		cListeners = new ArrayList<>();
 	}
-	
+
 	public BaseDeDonnees_client getDb() {
 		return this.db;
 	}
@@ -90,90 +90,89 @@ public class ClientMsg {
 		if (l != null)
 			mListeners.add(l);
 	}
+
 	public String formatageMessage(Packet p) {
-		if( p.srcId == 0 ) {
+		if (p.srcId == 0) {
 			mettreAJourConnected(p);
 			return null;
-		}
-		else {
-		StringBuffer message = new StringBuffer("");
-		if (p.destId < 0) {
-			message.append("Message reçu de "+p.srcId+" dans le groupe ");
-			System.out.println(message);
-			ByteBuffer data = ByteBuffer.wrap(p.data);
-			byte  longueurNom = data.get();
-			for (int i = 0; i<longueurNom; i++) {
-				message.append(data.getChar());
-			}
-			byte[] dataMessage = new byte[data.remaining()];
-			int i  = 0;
-			while(data.hasRemaining()) {
-				dataMessage[i] = data.get();
-				i +=1;
-			}
-			message.append(" : ");
-			String messageString = new String(dataMessage);
-			message.append(messageString);
-			getDb().ajouterMessageGroupe(messageString, p.srcId, getIdentifier() , p.destId);
-			getDb().ajouterConversation(getIdentifier(), p.destId);
-		}
-		else  {
-			ByteBuffer data = ByteBuffer.wrap(p.data);
-			int type = data.getInt();
-
-			if (type != 10) {
-				message.append("Message reçu de " + p.srcId + " : ");
-				String text = new String(p.data);
-			getDb().ajouterMessage(text, p.srcId, getIdentifier());
-			getDb().ajouterConversation(getIdentifier(), p.srcId);
-
-			message.append(text);
-			
-			} else { // c'est un fichier
-				message.append("Fichier reçu de " + p.srcId + " : ");
-				//On lit le nom du fichier
-				byte longueurNomFichier = data.get();
-				byte[] nameBytes = new byte[longueurNomFichier];
-				data.get(nameBytes);
-				String nomFichier = new String(nameBytes, StandardCharsets.UTF_8);
-				String messageCheckExtension = nomFichier.toString();
-				System.out.println(messageCheckExtension);
-				System.out.println(messageCheckExtension.endsWith(".txt"));
-			
-				String textePourBdd = "vous a envoyé le fichier "+nomFichier;
-				getDb().ajouterMessage(textePourBdd, p.srcId, getIdentifier());
-				getDb().ajouterConversation(getIdentifier(), p.srcId);
-
-				if (messageCheckExtension.endsWith(".txt")) {
-					message.append("\nContenu du fichier texte :\n");
-					byte[] dataFichier = new byte[data.remaining()];
-					int i  = 0;
-					while (data.hasRemaining()) {
-						dataFichier[i] = data.get();
-						i += 1;
-					}
-					
-					message.append(new String(dataFichier));
-				} else {
-
-					message.append(". Vérifiez votre répertoire.");
+		} else {
+			StringBuffer message = new StringBuffer("");
+			if (p.destId < 0) {
+				String messageString;
+				message.append("Message reçu de " + p.srcId + " dans le groupe ");
+				System.out.println(message);
+				ByteBuffer data = ByteBuffer.wrap(p.data);
+				byte longueurNom = data.get();
+				for (int i = 0; i < longueurNom; i++) {
+					message.append(data.getChar());
 				}
-				
-			}
-			
-			
 
-			
-			
+				byte[] dataMessage = new byte[data.remaining()];
+				int i = 0;
+				while (data.hasRemaining()) {
+					dataMessage[i] = data.get();
+					i += 1;
+				}
+				message.append(" : ");
+				messageString = new String(dataMessage);
+				message.append(messageString);
+
+				getDb().ajouterMessageGroupe(messageString, p.srcId, getIdentifier(), p.destId);
+				getDb().ajouterConversation(getIdentifier(), p.destId);
+			} else {
+				ByteBuffer data = ByteBuffer.wrap(p.data);
+				int type = data.getInt();
+
+				if (type != 10) {
+					message.append("Message reçu de " + p.srcId + " : ");
+					String text = new String(p.data);
+					getDb().ajouterMessage(text, p.srcId, getIdentifier());
+					getDb().ajouterConversation(getIdentifier(), p.srcId);
+
+					message.append(text);
+
+				} else { // c'est un fichier
+					message.append("Fichier reçu de " + p.srcId + " : ");
+					// On lit le nom du fichier
+					byte longueurNomFichier = data.get();
+					byte[] nameBytes = new byte[longueurNomFichier];
+					data.get(nameBytes);
+					String nomFichier = new String(nameBytes, StandardCharsets.UTF_8);
+					String messageCheckExtension = nomFichier.toString();
+					System.out.println(messageCheckExtension);
+					System.out.println(messageCheckExtension.endsWith(".txt"));
+
+					String textePourBdd = "vous a envoyé le fichier " + nomFichier;
+					getDb().ajouterMessage(textePourBdd, p.srcId, getIdentifier());
+					getDb().ajouterConversation(getIdentifier(), p.srcId);
+
+					if (messageCheckExtension.endsWith(".txt")) {
+						message.append("\nContenu du fichier texte :\n");
+						byte[] dataFichier = new byte[data.remaining()];
+						int i = 0;
+						while (data.hasRemaining()) {
+							dataFichier[i] = data.get();
+							i += 1;
+						}
+
+						message.append(new String(dataFichier));
+					} else {
+
+						message.append(". Vérifiez votre répertoire.");
+					}
+
+				}
+
+			}
+			return message.toString();
 		}
-		return message.toString();
-		}
+
 	}
 
 	protected void notifyMessageListeners(Packet p) {
 		mListeners.forEach(x -> x.messageReceived(p));
 	}
-	
+
 	/**
 	 * Register a ConnectionListener to the client. It will be notified if the
 	 * connection start or ends.
@@ -183,7 +182,7 @@ public class ClientMsg {
 	public void addConnectionListener(ConnectionListener l) {
 		if (l != null)
 			cListeners.add(l);
-		
+
 	}
 
 	protected void notifyConnectionListeners(boolean active) {
@@ -212,7 +211,7 @@ public class ClientMsg {
 					identifier = dis.readInt();
 				}
 				// start the receive loop
-				System.out.println("mon id est le  :"+this.getIdentifier());
+				System.out.println("mon id est le  :" + this.getIdentifier());
 				this.db = new BaseDeDonnees_client(identifier);
 				new Thread(() -> receiveLoop()).start();
 				notifyConnectionListeners(true);
@@ -224,9 +223,9 @@ public class ClientMsg {
 		}
 	}
 
-	//si il y a un fichier attaché  un message
-	public void sendFile(int destId,String filePath) throws IOException {
-		
+	// si il y a un fichier attaché un message
+	public void sendFile(int destId, String filePath) throws IOException {
+
 		File file = new File(filePath);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
@@ -241,11 +240,10 @@ public class ClientMsg {
 		dos.write(fileBytes); // données du fichier
 
 		dos.flush();
-		db.ajouterMessage( "vous avez envoyé "+fileName, getIdentifier(), destId);
+		db.ajouterMessage("vous avez envoyé " + fileName, getIdentifier(), destId);
 		db.ajouterConversation(getIdentifier(), destId);
 		sendPacket(destId, bos.toByteArray());
 	}
-
 
 	/**
 	 * Send a packet to the specified destination (etiher a userId or groupId)
@@ -298,19 +296,20 @@ public class ClientMsg {
 		s = null;
 		notifyConnectionListeners(false);
 	}
-	
+
 	public void mettreAJourConnected(Packet p) {
 		ByteBuffer data = ByteBuffer.wrap(p.data);
 		this.connected = new ArrayList<Integer>();
-		while ( data.hasRemaining()) {
+		while (data.hasRemaining()) {
 			this.connected.add(data.getInt());
 		}
-		for ( Integer i : this.connected) {
+		for (Integer i : this.connected) {
 			System.out.println("liste des users connected : ");
 			System.out.print(i + ",");
 		}
 	}
-	public ArrayList<Integer> getConnected(){
+
+	public ArrayList<Integer> getConnected() {
 		return this.connected;
 	}
 
@@ -356,17 +355,17 @@ public class ClientMsg {
 		String lu = null;
 		while (!"\\quit".equals(lu)) {
 			try {
-				System.out.println("Que voulez vous faire ? 0 : écrire, 1 créer un groupe, 2 quitter un groupe, 3 suprimer un groupe, 4 ajouter un membre, 5 retirer un membre, 6 renommer un groupe");
-				int type = Integer.parseInt(sc.nextLine());				
-				if ( type == 0) { //message classique
-				System.out.println("à qui voulez-vous écrire");
-				int dest = Integer.parseInt(sc.nextLine());
-				System.out.println("Votre message ? ");
-				lu = sc.nextLine();
-				c.sendPacket(dest, lu.getBytes());
-				}
-				else if( type == 1) {
-					ArrayList<Integer> membres= new ArrayList<Integer>();
+				System.out.println(
+						"Que voulez vous faire ? 0 : écrire, 1 créer un groupe, 2 quitter un groupe, 3 suprimer un groupe, 4 ajouter un membre, 5 retirer un membre, 6 renommer un groupe");
+				int type = Integer.parseInt(sc.nextLine());
+				if (type == 0) { // message classique
+					System.out.println("à qui voulez-vous écrire");
+					int dest = Integer.parseInt(sc.nextLine());
+					System.out.println("Votre message ? ");
+					lu = sc.nextLine();
+					c.sendPacket(dest, lu.getBytes());
+				} else if (type == 1) {
+					ArrayList<Integer> membres = new ArrayList<Integer>();
 					System.out.println("Ajouter id membre : (-1) pour stopper");
 					int membre = Integer.parseInt(sc.nextLine());
 					while (membre != -1) {
@@ -385,17 +384,14 @@ public class ClientMsg {
 					}
 					c.sendPacket(0, data.array());
 
-				}
-				else if (type == 10) {
+				} else if (type == 10) {
 					System.out.println("À quel utilisateur voulez-vous envoyer un fichier ?");
 					int dest = Integer.parseInt(sc.nextLine());
 					System.out.println("Chemin vers le fichier : ");
 					String path = sc.nextLine();
-					
-					
-					
+
 					c.sendFile(dest, path);
-					
+
 				}
 			} catch (InputMismatchException | NumberFormatException e) {
 				System.out.println("Mauvais format");

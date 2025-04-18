@@ -167,7 +167,7 @@ public class ServerMsg {
 		}
 	}
 	public void sendConnected() {
-		LOG.info("ouié");
+		LOG.info("j'envois la liste des users connected aux Users");
 		this.sp.sendConnected(bddServ.getConnected());
 	}
 	public void stop() {

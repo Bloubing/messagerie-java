@@ -72,7 +72,7 @@ public class ListeConversationsPanel extends JPanel {
 		ArrayList<Integer> conversations = c.getDb().conversations();
 
 		for (Integer i : conversations) {
-			if (c.getConnected().contains(i)) {
+			if (c.getConnected().contains(i) || i < 0) {
 				JPanel panelCourant = new JPanel();
 				panelCourant.setLayout(new GridLayout(1, 0, 0, 0));
 				JLabel lblCourant = new JLabel("Conversation avec : " + i);

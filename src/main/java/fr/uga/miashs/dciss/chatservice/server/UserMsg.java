@@ -119,7 +119,6 @@ public class UserMsg implements PacketProcessor {
 		}
 		s = null;
 		this.server.getBddServ().deconnecter_user(userId);
-		this.server.getBddServ().getConnectedUsers();
 		LOG.info(userId + " deconnected");
 		this.server.sendConnected();
 	}
