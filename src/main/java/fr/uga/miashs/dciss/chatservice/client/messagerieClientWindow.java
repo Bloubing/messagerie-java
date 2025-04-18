@@ -75,7 +75,7 @@ public class messagerieClientWindow {
 		});
 		c.addMessageListener(p -> {
 			String s = c.formatageMessage(p);
-			if ( s != null)
+			if (s != null)
 				message_du_serveur.setText(s);
 		});
 		c.startSession();
@@ -154,7 +154,7 @@ public class messagerieClientWindow {
 		message_du_serveur.setFont(new Font("Dialog", Font.PLAIN, 25));
 		message_du_serveur.setEditable(false);
 		message_du_serveur.setBackground(new Color(154, 153, 150));
-		
+
 		c.addMessageListener(new MessageListenerImpl());
 		panelConv = new ListeConversationsPanel(c, this);
 		messages.add(panelConv);
@@ -198,11 +198,10 @@ public class messagerieClientWindow {
 			}
 		});
 	}
-	public  void revalidate() {
+
+	public void revalidate() {
 		panelConv.revalidate();
 		frame.revalidate();
 	}
-	
-	
 
 }

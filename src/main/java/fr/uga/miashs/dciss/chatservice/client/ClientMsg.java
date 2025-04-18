@@ -95,78 +95,73 @@ public class ClientMsg {
 		if (p.srcId == 0) {
 			mettreAJourConnected(p);
 			return null;
+		}
+		StringBuffer message = new StringBuffer("");
+		if (p.destId < 0) {
+			message.append("Message reçu de " + p.srcId + " dans le groupe ");
+			System.out.println(message);
+			ByteBuffer data = ByteBuffer.wrap(p.data);
+			byte longueurNom = data.get();
+			for (int i = 0; i < longueurNom; i++) {
+				message.append(data.getChar());
+			}
+			byte[] dataMessage = new byte[data.remaining()];
+			int i = 0;
+			while (data.hasRemaining()) {
+				dataMessage[i] = data.get();
+				i += 1;
+			}
+			message.append(" : ");
+			String messageString = new String(dataMessage);
+			message.append(messageString);
+			getDb().ajouterMessageGroupe(messageString, p.srcId, getIdentifier(), p.destId);
+			getDb().ajouterConversation(getIdentifier(), p.destId);
 		} else {
-			StringBuffer message = new StringBuffer("");
-			if (p.destId < 0) {
-				String messageString;
-				message.append("Message reçu de " + p.srcId + " dans le groupe ");
-				System.out.println(message);
-				ByteBuffer data = ByteBuffer.wrap(p.data);
-				byte longueurNom = data.get();
-				for (int i = 0; i < longueurNom; i++) {
-					message.append(data.getChar());
-				}
-				System.out.println(message);
-				byte[] dataMessage = new byte[data.remaining()];
-				int i = 0;
-				while (data.hasRemaining()) {
-					dataMessage[i] = data.get();
-					i += 1;
-				}
-				message.append(" : ");
-				messageString = new String(dataMessage);
-				message.append(messageString);
+			ByteBuffer data = ByteBuffer.wrap(p.data);
+			int type = data.getInt();
 
-				getDb().ajouterMessageGroupe(messageString, p.srcId, getIdentifier(), p.destId);
-				getDb().ajouterConversation(getIdentifier(), p.destId);
-			} else {
-				ByteBuffer data = ByteBuffer.wrap(p.data);
-				int type = data.getInt();
+			if (type != 10) {
+				message.append("Message reçu de " + p.srcId + " : ");
+				String text = new String(p.data);
+				getDb().ajouterMessage(text, p.srcId, getIdentifier());
+				getDb().ajouterConversation(getIdentifier(), p.srcId);
 
-				if (type != 10) {
-					message.append("Message reçu de " + p.srcId + " : ");
-					String text = new String(p.data);
-					getDb().ajouterMessage(text, p.srcId, getIdentifier());
-					getDb().ajouterConversation(getIdentifier(), p.srcId);
+				message.append(text);
 
-					message.append(text);
+			} else { // c'est un fichier
+				message.append("Fichier reçu de " + p.srcId + " : ");
+				// On lit le nom du fichier
+				byte longueurNomFichier = data.get();
+				byte[] nameBytes = new byte[longueurNomFichier];
+				data.get(nameBytes);
+				String nomFichier = new String(nameBytes, StandardCharsets.UTF_8);
+				String messageCheckExtension = nomFichier.toString();
+				System.out.println(messageCheckExtension);
+				System.out.println(messageCheckExtension.endsWith(".txt"));
 
-				} else { // c'est un fichier
-					message.append("Fichier reçu de " + p.srcId + " : ");
-					// On lit le nom du fichier
-					byte longueurNomFichier = data.get();
-					byte[] nameBytes = new byte[longueurNomFichier];
-					data.get(nameBytes);
-					String nomFichier = new String(nameBytes, StandardCharsets.UTF_8);
-					String messageCheckExtension = nomFichier.toString();
-					System.out.println(messageCheckExtension);
-					System.out.println(messageCheckExtension.endsWith(".txt"));
+				String textePourBdd = "vous a envoyé le fichier " + nomFichier;
+				getDb().ajouterMessage(textePourBdd, p.srcId, getIdentifier());
+				getDb().ajouterConversation(getIdentifier(), p.srcId);
 
-					String textePourBdd = "vous a envoyé le fichier " + nomFichier;
-					getDb().ajouterMessage(textePourBdd, p.srcId, getIdentifier());
-					getDb().ajouterConversation(getIdentifier(), p.srcId);
-
-					if (messageCheckExtension.endsWith(".txt")) {
-						message.append("\nContenu du fichier texte :\n");
-						byte[] dataFichier = new byte[data.remaining()];
-						int i = 0;
-						while (data.hasRemaining()) {
-							dataFichier[i] = data.get();
-							i += 1;
-						}
-
-						message.append(new String(dataFichier));
-					} else {
-
-						message.append(". Vérifiez votre répertoire.");
+				if (messageCheckExtension.endsWith(".txt")) {
+					message.append("\nContenu du fichier texte :\n");
+					byte[] dataFichier = new byte[data.remaining()];
+					int i = 0;
+					while (data.hasRemaining()) {
+						dataFichier[i] = data.get();
+						i += 1;
 					}
 
+					message.append(new String(dataFichier));
+				} else {
+
+					message.append(". Vérifiez votre répertoire.");
 				}
 
 			}
-			return message.toString();
-		}
 
+		}
+		return message.toString();
 	}
 
 	protected void notifyMessageListeners(Packet p) {
